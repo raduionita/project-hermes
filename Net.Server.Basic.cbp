@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Net.Server.Basic" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Net" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add library="lib/libws2_32.a" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Net" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="inc" />
+		</Compiler>
+		<Unit filename="inc/core.hpp" />
+		<Unit filename="inc/core/CBuffer.hpp" />
+		<Unit filename="inc/core/CError.hpp" />
+		<Unit filename="inc/core/CEvent.hpp" />
+		<Unit filename="inc/core/CEventListener.hpp" />
+		<Unit filename="inc/core/CException.hpp" />
+		<Unit filename="inc/net.hpp" />
+		<Unit filename="inc/net/CCloseEvent.hpp" />
+		<Unit filename="inc/net/CConnection.hpp" />
+		<Unit filename="inc/net/CConnectionEvent.hpp" />
+		<Unit filename="inc/net/CConnectionException.hpp" />
+		<Unit filename="inc/net/CError.hpp" />
+		<Unit filename="inc/net/CErrorEvent.hpp" />
+		<Unit filename="inc/net/CException.hpp" />
+		<Unit filename="inc/net/CFlushEvent.hpp" />
+		<Unit filename="inc/net/CMessage.hpp">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="inc/net/CMessageEvent.hpp" />
+		<Unit filename="inc/net/CMessageException.hpp" />
+		<Unit filename="inc/net/CRequest.hpp" />
+		<Unit filename="inc/net/CRequestEvent.hpp" />
+		<Unit filename="inc/net/CServer.hpp" />
+		<Unit filename="inc/net/CSocket.hpp" />
+		<Unit filename="src/core.cpp" />
+		<Unit filename="src/core/CError.cpp" />
+		<Unit filename="src/core/CException.cpp" />
+		<Unit filename="src/main.cpp" />
+		<Unit filename="src/net.cpp" />
+		<Unit filename="src/net/CError.cpp" />
+		<Unit filename="src/net/CMessage.cpp" />
+		<Unit filename="src/net/CServer.cpp" />
+		<Unit filename="src/net/CSocket.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

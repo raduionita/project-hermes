@@ -1,0 +1,140 @@
+████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
+██ server/client tcp/udp 
+
+  CLIENT          SERVER          CLIENT          SERVER
+  
+  TCP             TCP             UDP             UDP
+  
+  ::socket()      ::socket()      ::socket()      ::socket()
+  ::connect()     ::bind()        ::sendto()      ::bind()
+  ::send()        ::listen()      ::recvfrom()    ::select()
+  ::recv()        ::select()                      ::recvfrom()
+                  ::accept()                      ::sendto()
+                  ::recv()
+                  ::send()
+
+████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
+net::Socket
+net::Server
+net::TcpServer
+net::UdpServer
+
+net::Client
+
+net::Message
+net::UdpMessage : Message
+net::TcpMessage : Message
+
+net::tcp::Server : net::Server
+net::tcp::Client : net::Client
+net::tcp::Message: net::Message // +socket
+
+net::udp::Server : net::Server
+net::tcp::Client : net::Client
+net::tcp::Message : net::Message
+
+net::http::Server : net::Server
+net::http::Client : net::Client
+net::http::Request
+net::http::Response
+
+
+█████████████████████████
+
+
+
+████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████
+
+██ recvall 
+put the recv system call in a loop instead of if statement (repeat until it returns 0). it'll then receive the full data. 
+to end the connection, simply add the following header to your http message:
+Connection: close
+
+██ listen for new connections
+FD_SET(parentfd, &readfds);      /* add server socket fd */
+// select(...)
+if(ISSET(parentfd, &readfds))
+  newfd = accept();
+
+FD_SET(newfd, &readfds);         /* add client socket fd */  
+// select(maxfd + 1, &readfds, ...)
+if(ISSET(newfd, &readfds))
+  nbytes = recv(newfd, buff, sizeof(buff), 0)
+  
+FD_SET(0, &readfds);             /* add stdin fd (0) | use it to read server-side user commands */ 
+// select(...)
+if(FD_ISSET(STDIN_FILENO, &readfds))
+  fgets(out, 255, stdin);
+
+
+██ sendall
+char buff[4096];
+size_t len = strlen(buff);
+char *p = buff;
+ssize_t n;
+while ( len > 0 && (n=send(sock,p,len,0)) > 0 ) {
+  p += n;
+  len =- (size_t)n;
+}
+if ( len > 0 || n < 0 ) {
+  // oops, something went wrong
+}
+ 
+ 
+██ recvall
+char buff[4096];
+size_t len = sizeof(buff);
+char *p = buff;
+ssize_t n;
+while ( len > 0 && (n=recv(sock,p,len,0)) > 0 ) {
+  p += n;
+  len =- (size_t)n;
+}
+if ( len > 0 || n < 0 ) {
+  // oops, something went wrong
+}
+
+You need to check errno, not the length value to get the reason why the socket failed to return data. Also, EWOULDBLOCK
+is the other error code you should check for in addition to EAGAIN. Change your while loop as follows:
+
+while(1)
+{
+    int err;
+    printf("1\n");
+    length = recv(s, buffer, ETH_FRAME_LEN_MY, 0);
+    err = errno; // save off errno, because because the printf statement might reset it
+    printf("2\n");
+    if (length < 0)
+    {
+       if ((err == EAGAIN) || (err == EWOULDBLOCK))
+       {
+          printf("non-blocking operation returned EAGAIN or EWOULDBLOCK\n");
+       }
+       else
+       {
+          printf("recv returned unrecoverable error(errno=%d)\n", err);
+          break;
+       }
+    }           
+    //printf ("buffer %s\n", buffer);
+    print(buffer, length);
+}
+
+
+
+██ nonblock
+void set_nonblock(int socket) {
+    int flags;
+    flags = fcntl(socket,F_GETFL,0);
+    assert(flags != -1);
+    fcntl(socket, F_SETFL, flags | O_NONBLOCK);
+}
+
+██ resource
+http://linux.m2osw.com/c-implementation-udp-clientserver
+http://www.tutorialspoint.com/unix_sockets/socket_server_example.htm
+http://vichargrave.com/network-programming-design-patterns-in-c/
+https://github.com/vichargrave/tcpsockets/blob/master/server.cpp
+http://www.binarytides.com/multiple-socket-connections-fdset-select-linux/

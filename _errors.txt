@@ -1,0 +1,130 @@
+#ifndef MINISOCK_PLATFORM
+#define MINISOCK_PLATFORM
+
+#ifdef _WIN32
+
+    #define WIN32_LEAN_AND_MEAN
+    #include <winsock.h>
+    #include <stdio.h>
+
+    #define MINISOCK_SEND_SIGNAL_FLAGS 0
+
+    #define MINISOCK_LAST_ERROR WSAGetLastError()
+
+#else //linux
+
+
+    #include <stdio.h>
+    #include <errno.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <fcntl.h>
+    #include <netdb.h>
+    #include <arpa/inet.h>
+    #include <string.h>
+    #include <time.h>
+
+    #ifndef closesocket
+    #define closesocket close
+    #endif
+
+    #ifndef SOCKET
+    #define SOCKET int
+    #endif
+
+    #ifndef SOCKET_ERROR
+    #define SOCKET_ERROR -1
+    #endif
+
+    #define MINISOCK_SEND_SIGNAL_FLAGS MSG_NOSIGNAL
+
+    #define MINISOCK_LAST_ERROR errno
+
+#endif //def _WIN32
+
+
+#include "errors.h"
+
+#endif //ndef MINISOCK_PLATFORM
+
+
+ 
+
+
+and errors.h:
+
+#ifndef MINISOCK_ERRORS
+#define MINISOCK_ERRORS
+
+#ifdef _WIN32
+    #define MINISOCK_ADDRINUSE        WSAEADDRINUSE
+
+    #define MINISOCK_WOULDBLOCK        WSAEWOULDBLOCK
+    #define MINISOCK_ALREADY        WSAEALREADY
+    #define MINISOCK_ISCONN            WSAEISCONN
+    #define MINISOCK_INVAL            WSAEINVAL
+    #define MINISOCK_INPROGRESS        WSAEINPROGRESS
+    #define MINISOCK_CONNRESET        WSAECONNRESET
+    #define MINISOCK_ADDRNOTAVAIL    WSAEADDRNOTAVAIL
+    #define MINISOCK_AFNOSUPPORT    WSAEAFNOSUPPORT
+    #define MINISOCK_CONNABORTED    WSAECONNABORTED
+    #define MINISOCK_CONNREFUSED    WSAECONNREFUSED
+    #define MINISOCK_DESTADDRREQ    WSAEDESTADDRREQ
+    #define MINISOCK_FAULT            WSAEFAULT
+    #define MINISOCK_HOSTDOWN        WSAEHOSTDOWN
+    #define MINISOCK_HOSTUNREACH    WSAEHOSTUNREACH
+    #define MINISOCK_MFILE            WSAEMFILE
+    #define MINISOCK_MSGSIZE        WSAEMSGSIZE
+    #define MINISOCK_NETDOWN        WSAENETDOWN
+    #define MINISOCK_NETRESET        WSAENETRESET
+    #define MINISOCK_NETUNREACH        WSAENETUNREACH
+    #define MINISOCK_NOBUFS            WSAENOBUFS
+    #define MINISOCK_NOTCONN        WSAENOTCONN
+    #define MINISOCK_NOTSOCK        WSAENOTSOCK
+    #define MINISOCK_PFNOSUPPORT    WSAEPFNOSUPPORT
+    #define MINISOCK_SHUTDOWN        WSAESHUTDOWN
+    #define MINISOCK_TIMEDOUT        WSAETIMEDOUT
+    #define MINISOCK_HOST_NOT_FOUND    WSAHOST_NOT_FOUND
+    #define MINISOCK_NO_RECOVERY    WSANO_RECOVERY
+    #define MINISOCK_TRY_AGAIN        WSATRY_AGAIN
+    //Winsock specific
+
+    #define MINISOCK_PROCLIM            WSAEPROCLIM
+    #define MINISOCK_NOTINITIALISED        WSANOTINITIALISED
+    #define MINISOCK_SYSNOTREADY        WSASYSNOTREADY
+    #define MINISOCK_VERNOTSUPPORTED    WSAVERNOTSUPPORTED
+#else
+    #define MINISOCK_WOULDBLOCK        EAGAIN
+    #define MINISOCK_ALREADY        EALREADY
+    #define MINISOCK_ISCONN            EISCONN
+    #define MINISOCK_INVAL            EINVAL
+    #define MINISOCK_INPROGRESS        EINPROGRESS
+    #define MINISOCK_CONNRESET        ECONNRESET
+    #define MINISOCK_ADDRINUSE        EADDRINUSE
+    #define MINISOCK_ADDRNOTAVAIL    EADDRNOTAVAIL
+    #define MINISOCK_AFNOSUPPORT    EAFNOSUPPORT
+    #define MINISOCK_CONNABORTED    ECONNABORTED
+    #define MINISOCK_CONNREFUSED    ECONNREFUSED
+    #define MINISOCK_DESTADDRREQ    EDESTADDRREQ
+    #define MINISOCK_FAULT            EFAULT
+    #define MINISOCK_HOSTDOWN        EHOSTDOWN
+    #define MINISOCK_HOSTUNREACH    EHOSTUNREACH
+    #define MINISOCK_MFILE            EMFILE
+    #define MINISOCK_MSGSIZE        EMSGSIZE
+    #define MINISOCK_NETDOWN        ENETDOWN
+    #define MINISOCK_NETRESET        ENETRESET
+    #define MINISOCK_NETUNREACH        ENETUNREACH
+    #define MINISOCK_NOBUFS            ENOBUFS
+    #define MINISOCK_NOTCONN        ENOTCONN
+    #define MINISOCK_NOTSOCK        ENOTSOCK
+    #define MINISOCK_PFNOSUPPORT    EPFNOSUPPORT
+    #define MINISOCK_SHUTDOWN        ESHUTDOWN
+    #define MINISOCK_TIMEDOUT        ETIMEDOUT
+    #define MINISOCK_HOST_NOT_FOUND    HOST_NOT_FOUND
+    #define MINISOCK_NO_RECOVERY    NO_RECOVERY
+    #define MINISOCK_TRY_AGAIN        TRY_AGAIN
+#endif
+
+#endif //ndef MINISOCK_ERRORS
