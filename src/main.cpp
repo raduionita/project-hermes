@@ -14,13 +14,14 @@ void testtcp()
   
   srv.on("connection", [&srv](net::CConnection& con) {
     con.on("message", [&con, &srv](net::CMessage& msg) {
+      // @todo: keep-alive tcp machanism
       for(auto it = srv.mConnections.begin(); it != srv.mConnections.end(); ++it) 
       {
         net::CConnection*& con = it->second;
         con->write(msg);
         con->flush();
+        con->end("\n"); // send data to client(w/ flush), client is disconnected 
       }
-      //con.end("second"); // send data to client(w/ flush), client is disconnected
     });
     con.on("close", []() {
       std::cout << "> closed" << std::endl;
@@ -52,7 +53,7 @@ void testhttp()
 
 int main()
 {
-  testhttp();
+  testtcp();
 
   return 0;
 }

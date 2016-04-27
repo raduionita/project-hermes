@@ -332,7 +332,7 @@ namespace net
             conn.mBuffer.clear();
           }
           // close
-          std::cout << conn.mState << std::endl;
+          // std::cout << conn.mState << std::endl;
           if(conn.mState == CConnection::DONE)   // done with flushing
           {
             conn.trigger(CCloseEvent());
@@ -452,7 +452,7 @@ namespace net
                       }
                       else                                  // processing data
                       {
-                        message = CTcpMessage(conn->mSocket, message);
+                        message = CTcpMessage(conn->mSocket, input);
                         //CEventManager::trigger(this, CMessageEvent(message));
                         this->trigger(CMessageEvent(message));    // trigger message event for server
                         conn->trigger(CMessageEvent(message));    // trigger message event for socket
