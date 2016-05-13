@@ -39,6 +39,12 @@ namespace net
     socket_t mSocket;
   
     public:
+    CTcpMessage() : CMessage(), mSocket(0) 
+    { 
+    
+    }
+    
+    public:
     CTcpMessage(socket_t socket) : CMessage(), mSocket(socket) 
     { 
     

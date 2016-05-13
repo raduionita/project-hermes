@@ -1,118 +1,41 @@
-#define _DEBUG_
-#define WIN32_LEAN_AND_MEAN
+#define LOGTIME 0
 
-#include <net/CServer.hpp>
-#include <net/CMessage.hpp>
-#include <net/CRequest.hpp>
+#include <http.hpp>
 
-#include <iostream>
-#include <functional>
+#include <thread>
+#include <chrono>
 
-void testtcp()
+int main(int argc, char** argv)
 {
-  net::CTcpServer srv;
+  log::info << "::main(argc, argv) > " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count() << log::endl;
   
-  srv.on("connection", [&srv](net::CConnection& con) {
-    con.on("message", [&con, &srv](net::CMessage& msg) {
-      // @todo: keep-alive tcp machanism
-      for(auto it = srv.mConnections.begin(); it != srv.mConnections.end(); ++it) 
-      {
-        net::CConnection*& con = it->second;
-        con->write(msg);
-        con->flush();
-        con->end("\n"); // send data to client(w/ flush), client is disconnected 
-      }
-    });
-    con.on("close", []() {
-      std::cout << "> closed" << std::endl;
-    });
+  http::CServer server;
+  http::CRouter router(server);
+  router.match(http::ALL, [](http::CRequest& req, http::CResponse& res) {
+    res.type(http::JSON);
+    log::info << "> Router match" << log::endl;
   });
-  srv.on("message", [](net::CMessage& msg) {
-    std::cout << "Srv:Message..." << std::endl;
+  server.on("request", [](http::CRequest& req, http::CResponse& res) {
+    //std::this_thread::sleep_for(std::chrono::seconds(2));
+    log::info << ("> Server request: ") << req.body() << " Response type: " << res.type() << log::endl;
   });
-  srv.on("error", [](net::CError& err) {
-    std::cout << err << std::endl;
+  server.listen([]() {
+    log::info << "> Listening." << log::endl;
   });
-  srv.listen([](void) {
-    std::cout << "> Listening..." << std::endl;
-  });
-}
-
-void testhttp()
-{
-  net::CHttpServer srv;
-  srv.on("request", [&srv](net::CRequest& req, net::CResponse& res) {
-    res.write("something");
-    // res.status(200, "OK");
-    res.end();
-  });
-  srv.listen(80, []() {
-    std::cout << "> Listening..." << std::endl;
-  });
-}
-
-int main()
-{
-  testtcp();
-
   return 0;
 }
 
-//net::CTransport;
-//net::CTcpTransport;
-//net::CUdpTransport;
-//
-//net::CServer
-//net::CServer<CTcpTransport> /* vs */ net::CTcpServer
-  //CServer* srv = new CServer(EProtocol::TCP, EAddress::IPV4);
-//net::CServer<CUdpTransport> /* vs */ net::CUdpServer
-//
-//http::CServer srv
-  //srv.on("request", []() { });
-//rtsp::CServer
-//smtp::CServer
-//ldap::CServer
-//dhcp::CServer
-//imap::CServer
+// restfull
+  // RESOURCE
+    // /tickets              # get all tickets
+    // /tickets/19           # get a ticket 
+    // /tickets/10/messages  # get all messages within tickets
+  // FILTERING
+    // /tickets?order=-priority                                           # order by priority desc
+    // /tickets?filter[status]=1                                          # where status = 1
+    // /tickets?fields=id,subject,status&order=-updated&limit=10          # only specific fields
+    // /tickets?filter[subject]=%something                                # where subject like '%something'
 
-
-// Buffer
-
-// Socket
-
-// Agent
-
-// Server : Agent
-  // Server::onOutput()
-    // 
-  // Server::onInput()
-    // -> Server::onMessage()
-    // OR
-    // -> Server::onDisconnect() // if empty input
-
-// UdpServer : Client
-
-// TcpServer : Server
-
-// HttpServer : TcpServer
-
-// Client : Agent
-  // Client::onInput() from Server::onOutput
-
-// UdpClient : Client
-
-// TcpClient : Client
-
-// Message
-
-// TcpMessage : Message
-  // Socket mSrc
-  // Socket mDst
-
-// UdpMessage : Message
-
-// Stream 
-  // Stream::flush()
-    // EventManager::trigger(flush)
-  // Stream::write()
-  // 
+    
+// www.exmaple.com/my-cool-product-category 
+// api.example.com/products/413

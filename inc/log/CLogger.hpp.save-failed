@@ -1,0 +1,127 @@
+#ifndef __log_clogger_hpp__
+#define __log_clogger_hpp__
+
+#include <core/CException.hpp>
+
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <ctime>
+
+#ifndef LOGGING
+  #define LOGGING 1
+#endif // LOGGING
+
+namespace log
+{
+  class CLogger;
+
+  class CLoggerStrategy
+  {
+    friend class CLogger;
+  
+    public:
+    CLoggerStrategy();
+    virtual ~CLoggerStrategy();
+  
+    public:
+    virtual void log(const std::string& message) = 0;
+  };
+  
+  extern void flush(CLoggerStrategy& strategy, std::string& output);
+  
+  extern void endl(CLoggerStrategy& strategy, std::string& output);
+
+  class CLogger
+  {
+    public:
+    typedef void(*manipulator_t)(CLoggerStrategy&, std::string&);
+    typedef struct tm timeinfo_t;
+    
+    enum class EType : int
+    {
+      INFO  = 0x01,
+      DEBUG = 0x02,
+      WARN  = 0x04,
+      FATAL = 0x10
+    };
+  
+    protected:
+    CLoggerStrategy* mStrategy;
+    volatile std::string      mOutput;
+    EType            mType;
+    time_t           mTime;
+    
+    public:
+    CLogger();
+    CLogger(CLoggerStrategy* pStrategy);
+    virtual ~CLogger();
+    
+    CLogger& operator <<(const EType& type);
+    CLogger& operator <<(const std::string& output);
+    CLogger& operator <<(manipulator_t manipulator);
+    
+    template <typename T>
+    CLogger& operator <<(const T& output)
+    {
+      std::stringstream ss;
+      ss << output;
+      mOutput.append(ss.str());
+      return *this;
+    }
+    
+    template <typename T>
+    friend CLogger& operator << (const CLogger::EType&, const T&);
+  
+    public:
+    CLogger& setStrategy(CLoggerStrategy* pStrategy);
+  };
+
+  class CFileLoggerStrategy : public CLoggerStrategy
+  {
+    friend class CLogger;
+    
+    protected:
+    std::fstream mFStream;
+    
+    public:
+    CFileLoggerStrategy(const std::string& file);
+    ~CFileLoggerStrategy();
+    
+    public:
+    void log(const std::string& output);
+  };
+  
+  class CCoutLoggerStrategy : public CLoggerStrategy
+  {
+    friend class CLogger;
+    
+    public:
+    CCoutLoggerStrategy();
+    
+    public:
+    void log(const std::string& output);
+  };
+
+  extern CCoutLoggerStrategy cout;
+  extern CLogger             log;
+  extern const std::string   tab;
+
+  extern CLogger::EType info;
+  extern CLogger::EType debug;
+  extern CLogger::EType warn;
+  extern CLogger::EType error;
+
+  template <typename T>
+  CLogger& operator << (CLogger::EType& type, T const& output)
+  {
+    log << type;
+    log << output;
+    return log;
+  }
+
+  extern CLoggerStrategy& operator >> (CLoggerStrategy& oStrategy, CLogger& oLog);
+}
+
+#endif // __log_clogger_hpp__

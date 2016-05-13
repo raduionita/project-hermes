@@ -1,0 +1,111 @@
+# depslib dependency file v1.0
+1463150440 source:c:\workspace\cpp\project.hermes\src\main.cpp
+	<http.hpp>
+	<thread>
+	<chrono>
+
+1463153081 c:\workspace\cpp\project.hermes\inc\http.hpp
+	<core/CEvent.hpp>
+	<core/CEventEmmiter.hpp>
+	<core/CSynchronizable.hpp>
+	<log/CLogger.hpp>
+	<net/CServer.hpp>
+	<net/CSocket.hpp>
+	<net/CMessage.hpp>
+	<functional>
+	<map>
+	<tuple>
+	<vector>
+	<string>
+	<chrono>
+
+1463150327 c:\workspace\cpp\project.hermes\inc\core.hpp
+	<string>
+	<ostream>
+
+1462285712 c:\workspace\cpp\project.hermes\inc\net.hpp
+	<ws2tcpip.h>
+	<errno.h>
+	<core.hpp>
+	<cstddef>
+	<cstdio>
+
+1463069198 c:\workspace\cpp\project.hermes\inc\net\cserver.hpp
+	<net.hpp>
+	<net/CSocket.hpp>
+	<core/CException.hpp>
+
+1463069289 c:\workspace\cpp\project.hermes\inc\net\csocket.hpp
+	<net.hpp>
+	<core/CException.hpp>
+
+1462286414 c:\workspace\cpp\project.hermes\inc\core\cexception.hpp
+	<exception>
+	<string>
+	<core.hpp>
+
+1463068867 c:\workspace\cpp\project.hermes\inc\core\cevent.hpp
+	<core.hpp>
+	<log/CLogger.hpp>
+	<iostream>
+
+1463128227 c:\workspace\cpp\project.hermes\inc\core\ceventemmiter.hpp
+	<core/CEvent.hpp>
+	<core/CTaskManager.hpp>
+	<log/CLogger.hpp>
+	<utility>
+	<functional>
+	<vector>
+	<iostream>
+
+1463069174 c:\workspace\cpp\project.hermes\inc\net\cmessage.hpp
+	<net.hpp>
+	<string>
+
+1463130870 c:\workspace\cpp\project.hermes\inc\core\ctaskmanager.hpp
+	<core.hpp>
+	<core/TSingleton.hpp>
+	<log/CLogger.hpp>
+	<future>
+	<thread>
+	<functional>
+	<map>
+	<utility>
+	<iostream>
+
+1462535406 c:\workspace\cpp\project.hermes\inc\core\csingleton.hpp
+	<core.hpp>
+
+1463128417 source:c:\workspace\cpp\project.hermes\src\core\ctaskmanager.cpp
+	<core/CTaskManager.hpp>
+
+1462544288 c:\workspace\cpp\project.hermes\inc\core\tsingleton.hpp
+	<core.hpp>
+
+1462544174 source:c:\workspace\cpp\project.hermes\src\core\tsingleton.cpp
+
+1463149349 source:c:\workspace\cpp\project.hermes\src\core.cpp
+	<core.hpp>
+
+1463129553 c:\workspace\cpp\project.hermes\inc\core\csynchronizable.hpp
+	<mutex>
+	<log.hpp>
+
+1463149135 c:\workspace\cpp\project.hermes\inc\log\clogger.hpp
+	<core/CException.hpp>
+	<vector>
+	<iostream>
+	<fstream>
+	<sstream>
+	<ctime>
+
+1463146394 c:\workspace\cpp\project.hermes\inc\log.hpp
+	<core.hpp>
+	<log/CLogger.hpp>
+
+1463146381 source:c:\workspace\cpp\project.hermes\src\log\clogger.cpp
+	<log/CLogger.hpp>
+
+1463149049 c:\workspace\cpp\project.hermes\inc\time.hpp
+	<chrono>
+

@@ -14,13 +14,35 @@ namespace core
     std::string mMessage;
 
     public:
-    CException(const std::string&);
-    CException(const std::string&, const char*, int);
-    virtual ~CException();
+    CException(const std::string& message) : std::exception(), mMessage(message)
+    {
+      // do nothing
+    }
+    
+    CException(const std::string& message, const char* file, int line) : std::exception()
+    {
+      mMessage.append(file);
+      mMessage.append(":");
+      mMessage.append(std::to_string(line));
+      mMessage.append(" ");
+      mMessage.append(message);
+    }
+    
+    virtual ~CException()
+    {
+      // do nothing
+    }
 
     public:
-    const char* what() const _GLIBCXX_USE_NOEXCEPT;
-    const char* getMessage() const _GLIBCXX_USE_NOEXCEPT;
+    const char* what() const _GLIBCXX_USE_NOEXCEPT
+    {
+      return mMessage.c_str();
+    }
+    
+    const char* getMessage() const _GLIBCXX_USE_NOEXCEPT
+    {
+      return what();
+    }
   };
 }
 

@@ -43,6 +43,20 @@ net::http::Response
 
 █████████████████████████
 
+http::Server srv;
+dba::SQLite db("/path/to/db.sqlite");
+dba::ORM orm(db, "???");
+
+srv.on("request", [](Request& req, Response& res) {
+  // executed before match's...
+});
+srv.match(http::GET, "/products/:id", [](Request& req, Response& res) {
+  Repository& repo = orm.repository("Product");
+  Product& product = dynamic_cast<Product&>(repo.find(req.param("id")));
+  
+  res.type(http::JSON);
+  res.write(JSON.stringify(product)); // OR .send(...)
+});
 
 
 ████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████

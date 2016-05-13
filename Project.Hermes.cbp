@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Project.Hermes" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Project" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Project" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="inc" />
+		</Compiler>
+		<Linker>
+			<Add library="lib/libws2_32.a" />
+		</Linker>
+		<Unit filename="inc/core.hpp" />
+		<Unit filename="inc/core/CEvent.hpp" />
+		<Unit filename="inc/core/CEventEmmiter.hpp" />
+		<Unit filename="inc/core/CException.hpp" />
+		<Unit filename="inc/core/CSynchronizable.hpp" />
+		<Unit filename="inc/core/CTaskManager.hpp" />
+		<Unit filename="inc/core/TSingleton.hpp" />
+		<Unit filename="inc/http.hpp" />
+		<Unit filename="inc/log.hpp" />
+		<Unit filename="inc/log/CLogger.hpp" />
+		<Unit filename="inc/net.hpp" />
+		<Unit filename="inc/net/CMessage.hpp" />
+		<Unit filename="inc/net/CServer.hpp" />
+		<Unit filename="inc/net/CSocket.hpp" />
+		<Unit filename="src/core.cpp" />
+		<Unit filename="src/core/CTaskManager.cpp" />
+		<Unit filename="src/log/CLogger.cpp" />
+		<Unit filename="src/main.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

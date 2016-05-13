@@ -11,58 +11,89 @@ namespace net
   {
     public:
     std::string mMessage;
-    status_t    mStatus;
     
     public:
-    CMessage();
-    CMessage(const std::string&);
-    virtual ~CMessage();
+    CMessage()
+    {
+      log::info << "net::CMessage::CMessage()" << log::endl;
+    }
     
-    operator std::string ();
-    operator const std::string () const;
+    CMessage(const CMessage& that)
+    {
+      log::info << "net::CMessage::CMessage(that&)" << log::endl;
+      mMessage = that.mMessage;
+    }
     
-    operator const char* () const;
+    CMessage(CMessage&& that)
+    {
+      log::info << "net::CMessage::CMessage(that&&)" << log::endl;
+      mMessage = std::move(that.mMessage);
+    }
+    
+    CMessage(const std::string& message) : mMessage(message)
+    {
+      log::info << "net::CMessage::CMessage(message)" << log::endl;
+    }
+    
+    virtual ~CMessage()
+    {
+      log::info << "net::CMessage::~CMessage()" << log::endl;
+    }
+    
+    CMessage& operator =(CMessage& that)
+    {
+      log::info << "net::CMessage::operator =(that&)" << log::endl;
+      if(this != &that)
+      {
+        mMessage = that.mMessage;
+      }
+      return *this;
+    }
+    
+    CMessage& operator =(CMessage&& that)
+    {
+      log::info << "net::CMessage::operator =(that&&)" << log::endl;
+      if(this != &that)
+      {
+        mMessage = std::move(that.mMessage);
+      }
+      return *this;
+    }
+    
+    operator std::string ()
+    {
+      return mMessage;
+    }
+    
+    operator const std::string () const
+    {
+      return mMessage;
+    }
+    
+    operator const char* () const
+    {
+      return mMessage.c_str();
+    }
     
     public:
     CMessage& append(const char* chunk, size_t length);
     CMessage& append(const char ch);
     CMessage& status(status_t status);
     status_t  status() const;
-    size_t    size() const;
+    
+    size_t    size() const
+    {
+      return mMessage.size();
+    }
   
     friend std::ostream& operator << (std::ostream&, const CMessage&);
   };
   
-  class CTcpMessage : public CMessage
+  std::ostream& operator <<(std::ostream& out, const CMessage& msg)
   {
-    protected:
-    socket_t mSocket;
-  
-    public:
-    CTcpMessage() : CMessage(), mSocket(0) 
-    { 
-    
-    }
-    
-    public:
-    CTcpMessage(socket_t socket) : CMessage(), mSocket(socket) 
-    { 
-    
-    }
-    
-    CTcpMessage(socket_t socket, const CMessage& that) : CMessage(), mSocket(socket) 
-    { 
-      mMessage = that.mMessage;
-      mStatus  = that.mStatus;
-    }
-    
-    CTcpMessage(const CTcpMessage& that)
-    {
-      mMessage = that.mMessage;
-      mStatus  = that.mStatus;
-      mSocket  = that.mSocket;
-    }
-  };
+    out << msg.mMessage;
+    return out;
+  }
 }
 
 #endif // __net_cmessage_hpp__

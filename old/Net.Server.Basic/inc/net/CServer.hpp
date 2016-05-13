@@ -302,7 +302,7 @@ namespace net
       callback();
       
       {
-        CMessage message;
+        CTcpMessage message;
         
         result_t  result  = STATUS_OK;
         timeval_t timeout = { 0, 000000 }; // no timeout
@@ -332,7 +332,7 @@ namespace net
             conn.mBuffer.clear();
           }
           // close
-          std::cout << conn.mState << std::endl;
+          // std::cout << conn.mState << std::endl;
           if(conn.mState == CConnection::DONE)   // done with flushing
           {
             conn.trigger(CCloseEvent());
@@ -439,9 +439,9 @@ namespace net
                     else
                     {
                       CConnection* conn = it->second;
-                      message = recv(currfd);
+                      CMessage input = recv(currfd);
                       
-                      if(message.status() == STATUS_CLOSED) // connection closed
+                      if(input.status() == STATUS_CLOSED) // connection closed
                       {
                         std::cout << "> Received 0 bytes." << std::endl;
                         conn->trigger(CCloseEvent());
@@ -452,9 +452,10 @@ namespace net
                       }
                       else                                  // processing data
                       {
+                        message = CTcpMessage(conn->mSocket, input);
                         //CEventManager::trigger(this, CMessageEvent(message));
-                        this->trigger(CMessageEvent(CTcpMessage(conn->mSocket, message)));    // trigger message event for server
-                        conn->trigger(CMessageEvent(CTcpMessage(conn->mSocket, message)));    // trigger message event for socket
+                        this->trigger(CMessageEvent(message));    // trigger message event for server
+                        conn->trigger(CMessageEvent(message));    // trigger message event for socket
                       }
                     }
                   }
@@ -532,13 +533,21 @@ namespace net
       socket_t minfd;
       socket_t maxfd = srvfd;
       
+      result_t  result  = STATUS_OK;
+      timeval_t timeout = { 0, 000000 }; // no timeout
+      
+      fd_set ifdset; FD_ZERO(&ifdset); // incoming fd sockets
+      fd_set rfdset; FD_ZERO(&rfdset); // reading  fd sockets
+      fd_set wfdset; FD_ZERO(&wfdset); // writing  fd sockets
+      fd_set efdset; FD_ZERO(&efdset); // error    fd sockets
+      
       while(mRunning)
       {
         rfdset = ifdset;
         wfdset = ifdset;
         efdset = ifdset;
         
-        result = ::select(maxfd + 1, &rfdset, &wfdset, &efdset, NULL);
+        result = ::select(maxfd + 1, &rfdset, &wfdset, &efdset, &timeout);
         if(result < SOCKET_OK)
         {
           // select error
@@ -555,13 +564,13 @@ namespace net
             {
               if(curfd == srvfd) // new connection
               {
-                CConnection conn = accept();
-                CEventManager::trigger(this, CConnectionEvent());
+                //CConnection conn = accept();
+                //CEventManager::trigger(this, CConnectionEvent());
               }
               else               // incoming data
               {
                 
-                CEventManager::trigger(this, CRequestEvent());
+                //CEventManager::trigger(this, CRequestEvent());
               }
               
               // close connection

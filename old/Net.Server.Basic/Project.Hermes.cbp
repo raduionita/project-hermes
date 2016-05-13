@@ -63,6 +63,10 @@
 		<Unit filename="src/core/CError.cpp" />
 		<Unit filename="src/core/CException.cpp" />
 		<Unit filename="src/main.cpp" />
+		<Unit filename="src/main.old">
+			<Option compile="1" />
+			<Option link="1" />
+		</Unit>
 		<Unit filename="src/net.cpp" />
 		<Unit filename="src/net/CError.cpp" />
 		<Unit filename="src/net/CMessage.cpp" />
