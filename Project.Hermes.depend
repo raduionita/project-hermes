@@ -1,29 +1,30 @@
 # depslib dependency file v1.0
-1463150440 source:c:\workspace\cpp\project.hermes\src\main.cpp
+1463586141 source:c:\workspace\cpp\project.hermes\src\main.cpp
 	<http.hpp>
+	<os.hpp>
+	<watch.hpp>
 	<thread>
-	<chrono>
 
-1463153081 c:\workspace\cpp\project.hermes\inc\http.hpp
+1463674491 c:\workspace\cpp\project.hermes\inc\http.hpp
 	<core/CEvent.hpp>
 	<core/CEventEmmiter.hpp>
 	<core/CSynchronizable.hpp>
+	<core/CApp.hpp>
 	<log/CLogger.hpp>
 	<net/CServer.hpp>
 	<net/CSocket.hpp>
 	<net/CMessage.hpp>
+	<watch.hpp>
 	<functional>
 	<map>
 	<tuple>
 	<vector>
 	<string>
-	<chrono>
 
-1463150327 c:\workspace\cpp\project.hermes\inc\core.hpp
+1463473669 c:\workspace\cpp\project.hermes\inc\core.hpp
 	<string>
-	<ostream>
 
-1462285712 c:\workspace\cpp\project.hermes\inc\net.hpp
+1463674183 c:\workspace\cpp\project.hermes\inc\net.hpp
 	<ws2tcpip.h>
 	<errno.h>
 	<core.hpp>
@@ -35,7 +36,7 @@
 	<net/CSocket.hpp>
 	<core/CException.hpp>
 
-1463069289 c:\workspace\cpp\project.hermes\inc\net\csocket.hpp
+1463673063 c:\workspace\cpp\project.hermes\inc\net\csocket.hpp
 	<net.hpp>
 	<core/CException.hpp>
 
@@ -76,7 +77,7 @@
 1462535406 c:\workspace\cpp\project.hermes\inc\core\csingleton.hpp
 	<core.hpp>
 
-1463128417 source:c:\workspace\cpp\project.hermes\src\core\ctaskmanager.cpp
+1463584226 source:c:\workspace\cpp\project.hermes\src\core\ctaskmanager.cpp
 	<core/CTaskManager.hpp>
 
 1462544288 c:\workspace\cpp\project.hermes\inc\core\tsingleton.hpp
@@ -84,28 +85,45 @@
 
 1462544174 source:c:\workspace\cpp\project.hermes\src\core\tsingleton.cpp
 
-1463149349 source:c:\workspace\cpp\project.hermes\src\core.cpp
+1463473598 source:c:\workspace\cpp\project.hermes\src\core.cpp
 	<core.hpp>
 
 1463129553 c:\workspace\cpp\project.hermes\inc\core\csynchronizable.hpp
 	<mutex>
 	<log.hpp>
 
-1463149135 c:\workspace\cpp\project.hermes\inc\log\clogger.hpp
+1463667634 c:\workspace\cpp\project.hermes\inc\log\clogger.hpp
 	<core/CException.hpp>
+	<watch.hpp>
 	<vector>
 	<iostream>
 	<fstream>
 	<sstream>
-	<ctime>
 
-1463146394 c:\workspace\cpp\project.hermes\inc\log.hpp
+1463413755 c:\workspace\cpp\project.hermes\inc\log.hpp
 	<core.hpp>
 	<log/CLogger.hpp>
 
-1463146381 source:c:\workspace\cpp\project.hermes\src\log\clogger.cpp
+1463586552 source:c:\workspace\cpp\project.hermes\src\log\clogger.cpp
 	<log/CLogger.hpp>
 
 1463149049 c:\workspace\cpp\project.hermes\inc\time.hpp
 	<chrono>
+
+1463473474 c:\workspace\cpp\project.hermes\inc\core\capp.hpp
+	<core/CEventEmmiter.hpp>
+	<windows.h>
+
+1463488453 c:\workspace\cpp\project.hermes\inc\os.hpp
+	<core.hpp>
+	<conio.h>
+
+1463488257 c:\workspace\cpp\project.hermes\inc\watch.hpp
+	<core.hpp>
+	<chrono>
+	<ctime>
+	<string>
+
+1463487867 source:c:\workspace\cpp\project.hermes\src\watch.cpp
+	<watch.hpp>
 

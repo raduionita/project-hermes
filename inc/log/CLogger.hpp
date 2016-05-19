@@ -2,8 +2,9 @@
 #define __log_clogger_hpp__
 
 #include <core/CException.hpp>
+#include <watch.hpp>
 
-// enable or disable logging
+// @todo  Enable or disable logging
 #ifndef LOGGING
   #define LOGGING 1
 #endif // LOGGING
@@ -23,22 +24,25 @@
   #define LOGTIME 1
 #endif // LOGTIME
 
+#define LOGERR log::error
+#define LOGWRN log::warn
+#define LOGNFO log::info
+
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <ctime>
 
 namespace log
 { 
   enum class ELevel : int
   {
-    NONE  = 0x00,
-    FATAL = 0x01 | NONE,
-    ERROR = FATAL,
-    WARN  = 0x02 | FATAL,
-    DEBUG = 0x04 | WARN,
-    INFO  = DEBUG,
+    NONE  = 0x00,         // 0
+    FATAL = 0x01 | NONE,  // 1
+    ERROR = FATAL,        // 1
+    WARN  = 0x02 | FATAL, // 3
+    INFO  = 0x04 | WARN,  // 7
+    DEBUG = INFO          // 7
   };
   
   enum class EOption : int
@@ -85,17 +89,26 @@ namespace log
   
   extern void endl(CLoggerStrategy& strategy, const std::string& output);
   
+  extern void spinner(CLoggerStrategy& strategy);
+  
+  extern void loading(CLoggerStrategy& strategy);
+  
+  template <typename Rep, typename Period>
+  std::basic_ostream<char>& operator <<(std::basic_ostream<char>& out, const std::chrono::duration<Rep, Period>& in)
+  {
+    return out<< in.count();
+  }
+  
   class CLogger
   {
     public:
     typedef void(*manipulator_t)(CLoggerStrategy&, const std::string&);
-    typedef struct tm timeinfo_t;
+    typedef void(*special_t)(CLoggerStrategy&);
   
     protected:
     CLoggerStrategy*  mStrategy;
     std::stringstream mOutput;
-    ELevel             mType;
-    time_t            mTime;
+    ELevel            mType;
     
     public:
     CLogger();
@@ -104,6 +117,7 @@ namespace log
     
     CLogger& operator <<(const ELevel& type);
     CLogger& operator <<(manipulator_t manipulator);
+    CLogger& operator <<(special_t special);
     
     template <typename T>
     CLogger& operator <<(const T& output)
@@ -135,6 +149,7 @@ namespace log
     ~CFileLoggerStrategy();
     
     public:
+    void log(const char output);
     void log(const std::string& output);
   };
   
@@ -146,18 +161,21 @@ namespace log
     CCoutLoggerStrategy();
     
     public:
+    void log(const char output);
     void log(const std::string& output);
   };
 
   extern CCoutLoggerStrategy cout;
   extern CLogger             log;
-  extern const std::string   tab;
+  extern const char          tab;
+  extern const char          cr;
+  extern const char          nl;
 
   extern ELevel info;
   extern ELevel debug;
   extern ELevel warn;
   extern ELevel error;
-
+  
   template <typename T>
   CLogger& operator << (ELevel& type, T const& output)
   {
@@ -165,7 +183,7 @@ namespace log
     log << output;
     return log;
   }
-
+  
   extern CLoggerStrategy& operator >> (CLoggerStrategy& oStrategy, CLogger& oLog);
 }
 

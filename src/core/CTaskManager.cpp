@@ -44,6 +44,7 @@ namespace core
   CTaskManager::CTaskManager()
   {
     log::info << "core::CTaskManager::CTaskManager()" << log::endl;
+    log::info << "> Thread count: " << std::thread::hardware_concurrency() << log::endl;
   }
   
   CTaskManager::~CTaskManager()

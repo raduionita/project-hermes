@@ -2,7 +2,6 @@
 #define __core__
 
 #include <string>
-#include <ostream>
 
 namespace core
 {

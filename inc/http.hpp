@@ -4,6 +4,7 @@
 #include <core/CEvent.hpp>
 #include <core/CEventEmmiter.hpp>
 #include <core/CSynchronizable.hpp>
+#include <core/CApp.hpp>
 
 #include <log/CLogger.hpp>
 
@@ -11,12 +12,15 @@
 #include <net/CSocket.hpp>
 #include <net/CMessage.hpp>
 
+#include <watch.hpp>
+
 #include <functional>
 #include <map>
 #include <tuple>
 #include <vector>
 #include <string>
-#include <chrono>
+
+// @todo replace ::WSAGetLastError() with a define or something...
 
 namespace http
 {
@@ -36,6 +40,12 @@ namespace http
     CONNECT = 0x40,
     PATCH   = 0x80,
     ALL     = GET | POST | PUT | DELETE | OPTIONS | HEAD | TRACE | CONNECT | PATCH
+  };
+  
+  enum EState
+  {
+    IDLE = 0x01,
+    DONE = 0x02
   };
   
   enum EStatus
@@ -101,8 +111,8 @@ namespace http
     typedef       std::string value_t;
     
     protected:
-    std::chrono::milliseconds::rep mTimestamp;
     CSocket&                       mSocket;
+    watch::milliseconds            mTime;
     EVerb                          mVerb;
     std::string                    mPath;
     std::map<param_t, value_t>     mParams;
@@ -112,33 +122,29 @@ namespace http
     
     public:
     CRequest(CSocket& sock)
-    : mSocket(sock), mVerb(EVerb::ALL), mPath("/")
+    : mSocket(sock), mTime(watch::millitime()), mVerb(EVerb::ALL), mPath("/")
     {
       log::info << "http::CRequest::CRequest()" << log::endl;
-      // @todo: fill with defaults
-      
-      mTimestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+      // @todo Fill with defaults
     }
     
     CRequest(CSocket& sock, const CMessage& msg)
-    : mSocket(sock), mVerb(EVerb::ALL), mPath("/"), mBody(msg.mMessage)
+    : mSocket(sock), mTime(watch::millitime()), mVerb(EVerb::ALL), mPath("/"), mBody(msg.mMessage)
     {
-      // @todo: build header & body from CMessage
       log::info << "http::CRequest::CRequest(sock, msg)" << log::endl;
-      
-      mTimestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+      // @todo Build header & body from CMessage
     }
     
     CRequest(CRequest&& that) 
     : mSocket(that.mSocket)
     {
       log::info << "http::CRequest::CRequest(that&&)" << log::endl;
-      mVerb      = std::move(that.mVerb);
-      mPath      = std::move(that.mPath);
-      mParams    = std::move(that.mParams);
-      mHeads     = std::move(that.mHeads);
-      mBody      = std::move(that.mBody);
-      mTimestamp = std::move(that.mTimestamp);
+      mVerb   = std::move(that.mVerb);
+      mPath   = std::move(that.mPath);
+      mParams = std::move(that.mParams);
+      mHeads  = std::move(that.mHeads);
+      mBody   = std::move(that.mBody);
+      mTime   = std::move(that.mTime);
     }
     
     virtual ~CRequest()
@@ -183,24 +189,17 @@ namespace http
       return mBody;
     }
   
-    std::chrono::milliseconds::rep timestamp() const
+    watch::milliseconds time() const
     {
-      return mTimestamp;
+      return mTime;
     }
   };
   
   class CResponse : public core::CSynchronizable
   {
-    public:
-    enum EState
-    {
-      IDLE = 0x01,
-      DONE = 0x02
-    };
-    
     protected:
-    std::chrono::milliseconds::rep mTimestamp;
     CSocket&                       mSocket;
+    watch::milliseconds            mTime;
     std::map<EHead, std::string>   mHead;
     std::string                    mBody;
     uint                           mStatus;
@@ -208,30 +207,39 @@ namespace http
   
     public:
     CResponse(CSocket& sock) 
-    : mSocket(sock)
+    : mSocket(sock), mTime(watch::millitime())
     {
       log::info << "http::CResponse::CResponse(sock)" << log::endl;
       mStatus            = http::OK;
       mState             = EState::IDLE;
       mHead[EHead::TYPE] = "text/plain";
-      mTimestamp         = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     }
     
     CResponse(CResponse&& that)
     : mSocket(that.mSocket)
     {
       log::info << "http::CResponse::CResponse(that&&)" << log::endl;
-      mSocket  = std::move(that.mSocket);
-      mHead    = std::move(that.mHead);
-      mBody    = std::move(that.mBody);
-      mStatus  = std::move(that.mStatus);
-      mState   = std::move(that.mState);
+      mHead   = std::move(that.mHead);
+      mBody   = std::move(that.mBody);
+      mStatus = std::move(that.mStatus);
+      mState  = std::move(that.mState);
+      mTime   = std::move(that.mTime);
     }
     
     public:
     CSocket& socket() const
     {
       return mSocket;
+    }
+    
+    bool is(EState state) const
+    {
+      return mState == state;
+    }
+    
+    EState state() const
+    {
+      return mState;
     }
     
     CResponse& status(EStatus val)
@@ -307,9 +315,9 @@ namespace http
       return *this;
     }
     
-    std::chrono::milliseconds::rep timestamp() const
+    watch::milliseconds time() const
     {
-      return mTimestamp;
+      return mTime;
     }
   };
 
@@ -327,41 +335,94 @@ namespace http
   
   class CServer : public net::AServer, public CEventEmmiter
   {
+    typedef std::pair<CRequest*, CResponse*> client_t;
+    
     protected:
-    net::CSocket*                                        mServer;
-    std::map<CSocket*, std::pair<CRequest*, CResponse*>> mClients;
+    net::CSocket*                mServer;  // ptr::shared<CSocket> mServer;
+    std::map<CSocket*, client_t> mClients; // @todo Need shared pointers
     
     public:
-    port_t mPort;
-    host_t mHost;
+    port_t         mPort;    // 80, 8080
+    host_t         mHost;    // NULL, localhost, 127.0.0.1 or sub.domain.tld
+    watch::seconds mTime;    // seconds
+    bool           mRunning;
     
     public:
     CServer() 
-    : net::AServer(), mServer(nullptr), mPort(8080), mHost("localhost")
+    : net::AServer(), mServer(nullptr), mPort(8080), mHost("localhost"), mTime(10), mRunning(false)
     {
       log::info << "net::CServer::CServer()" << log::endl;
     }
     
     CServer(port_t port, host_t host) 
-    : net::AServer(), mServer(nullptr), mPort(port), mHost(host)
+    : net::AServer(), mServer(nullptr), mPort(port), mHost(host), mTime(10), mRunning(false)
     {
       log::info << "net::CServer::CServer(port, host)" << log::endl;
     }
     
     ~CServer()
     {
-      // @todo Wait for all CResponse's to be in CResponse::DONE state
-      
       log::info << "net::CServer::~CServer()" << log::endl;
-      for(auto it = mClients.begin(); it != mClients.end(); ++it) 
+      
+      while(mClients.size() > 0) // safely close client connections
       {
-        /* CResponse* */     delete it->second.second;  // it->second.second = nullptr;
-        /* CRequest* */      delete it->second.first;   // it->second.first = nullptr;
-        it->first->close();
-        /* const CSocket* */ delete it->first;          // it->first = nullptr;
+        log::info << "> Clients pending: " << mClients.size() << log::endl;
+      
+        auto then = watch::millitime();
+        then -= mTime;
+        bool wait = false;
+        
+        for(auto it = mClients.begin(); it != mClients.end();/* ++it */) 
+        {
+          if(it->second.first == nullptr || it->second.second == nullptr)
+          {
+            it->first->close();
+            mClients.erase(it++);
+          }
+          else
+          {
+            if(it->second.second->is(EState::DONE))       // ready for erase
+            {
+              log::info << "> Removing client... " << log::endl;
+            
+              /* CResponse* */     delete it->second.second; it->second.second = nullptr;
+              /* CRequest* */      delete it->second.first;  it->second.first  = nullptr;
+              it->first->close();
+              /* const CSocket* */ delete it->first;      // it->first = nullptr;
+              
+              mClients.erase(it++);
+            }
+            else
+            {
+              log::info << "> Time: " << it->second.second->time()  << " < " << then << log::endl;
+              
+              if(it->second.second->time() < then) // out of time
+              {
+                log::info << "> Ending client..." << log::endl;
+                
+                it->second.second->end();
+                
+                // @todo Try to send the response before closing
+              }
+              else                                           // wait another second
+              {
+                log::info << "> Not ready yet, I should wait..." << log::endl;
+                wait = true;
+              }
+              ++it;
+            }
+          }
+        }
+        
+        if(wait) // does it still need to wait?
+        {
+          log::info << "> Sleeping for 1 sec... " << log::endl;
+          std::this_thread::sleep_for(watch::seconds(1));
+        }
       }
-      close();
-      delete mServer;
+      
+      mServer->close();
+      delete mServer; mServer = nullptr;
     }
   
     public:
@@ -371,7 +432,7 @@ namespace http
       
       try // listening/server socket
       {
-        mServer = new net::CSocket(net::CSocket::SERVER, mPort, mHost, EProtocol::TCP, EAddressType::IPV4);
+        mServer = new net::CSocket(net::CSocket::SERVER, mPort, NULL, EProtocol::TCP, EAddressType::IPV4);
       }
       catch (core::CException& e)
       {
@@ -381,49 +442,190 @@ namespace http
     }
     
     void close()
-    {
+    { 
       log::info << "http::CServer::close()" << log::endl;
-      mServer->close();
+      mRunning = false;
     }
     
     CServer& listen(std::function<void(void)> callback = core::noop)
     {
       log::info << "http::CServer::listen(callback)" << log::endl;
     
-      bind();
+      bind();     // server socket created
     
-      callback();
+      callback(); // ready for loop
     
-      while(true)
+      result_t  result = STATUS_OK;
+      timeval_t timeout = { 0, 000000 }; // no timeout
+      
+      fd_set ifdset; FD_ZERO(&ifdset); // incoming fd sockets
+      fd_set rfdset; FD_ZERO(&rfdset); // reading  fd sockets
+      fd_set wfdset; FD_ZERO(&wfdset); // writing  fd sockets
+      fd_set efdset; FD_ZERO(&efdset); // error    fd sockets
+      
+      socket_t srvfd = (socket_t)(*mServer);
+      socket_t minfd = srvfd;
+      socket_t maxfd = minfd;
+      
+      mRunning = true;
+      while(mRunning)
       {
-        // trigger events...
+        rfdset = ifdset;
+        wfdset = ifdset;
+        efdset = ifdset;
+        FD_SET(srvfd, &rfdset); // add server to read
+      //FD_SET(STDIN_FILENO, &rfdset); // not in win32
+        FD_SET(srvfd, &efdset); // add server to except
+      //FD_SET(STDIN_FILENO, &efdset); // not in win32
+      
+        // @todo Normalize maxfd
+        // @todo Check for unclosed clients
+        
+        result = ::select(maxfd + 1, &rfdset, &wfdset, &efdset, &timeout);
+        if(result < RESULT_OK)       // error
         {
-          CSocket*  sock = new CSocket(CSocket::INVALID);
-          CMessage* msg  = new CMessage("request 0");
-          auto out = mClients.insert(std::move(std::make_pair(std::move(sock), std::move(std::make_pair(std::move(new CRequest(*sock, *msg)), std::move(new CResponse(*sock)))))));
-          CEventEmmiter::emit(new CRequestEvent(*(out.first->second.first)));
-          CEventEmmiter::emit(new CRequestEvent(*(out.first->second.first)));
-          CEventEmmiter::emit(new CRequestEvent(*(out.first->second.first)));
-          
-          delete msg;
+          // error
+          log::error << "> Error select() " << log::endl;
+          //CEventEmmiter::emit(new CErrorEvent(error));
+          close();
         }
-
+        else if(result == RESULT_OK) // timeout
         {
-          CSocket*  sock = new CSocket(CSocket::INVALID);
-          CMessage* msg  = new CMessage("request 1");
-          auto out = mClients.insert(std::move(std::make_pair(std::move(sock), std::move(std::make_pair(std::move(new CRequest(*sock, *msg)), std::move(new CResponse(*sock)))))));
-          CEventEmmiter::emit(new CRequestEvent(*(out.first->second.first)));
-          CEventEmmiter::emit(new CRequestEvent(*(out.first->second.first))); 
-          
-          delete msg;
+          // timeout
+          log::info << log::spinner; // log::warn << "> Timeout! " << log::endl;
+        }
+        else                         // result > RESULT_OK, result = num_sockets
+        {
+          // read/write...
+          for(socket_t curfd = minfd; curfd < (maxfd + 1); ++curfd)
+          {
+            if(FD_ISSET(curfd, &efdset)) // has exception
+            {
+              // @todo Close client/response
+              log::error << "> Exception on socket " << curfd << log::endl;
+              // @todo Remove from maxfd if you can
+              FD_CLR(curfd, &ifdset);
+              continue;
+            }
+            
+            if(FD_ISSET(curfd, &wfdset)) // can/ready for write
+            {
+              // @todo Mark writable
+              log::info << log::spinner;
+              // log::info << "Socket " << curfd << " is writable" << log::endl;
+            }
+            
+            if(FD_ISSET(curfd, &rfdset)) // ready for read
+            {
+              if(curfd == srvfd) // new connection
+              {
+                // @todo Move this to a method and surrounde it with a try catch
+                socket_t newfd = ::accept(srvfd, NULL, NULL);
+                if(newfd == INVALID_SOCKET)
+                {
+                  log::error << "Connection error!" << log::endl;
+                  // @todo emit -> new CErrorEvent(error)
+                }
+                else
+                {
+                  minfd = std::min(newfd, minfd);
+                  maxfd = std::max(newfd, maxfd);
+                  FD_SET(newfd, &ifdset);
+                  mClients.insert(std::move(std::make_pair(std::move(new CSocket(newfd)), std::make_pair(nullptr, nullptr))));
+                  //CEventEmmiter::emit(new CConnectionEvent(con));
+                }
+              }
+              else                // incoming data
+              {
+                log::info << "> Incoming message from socket " << curfd << "." << log::endl;
+                
+                std::string msg;
+                char    chunk[32 + 1];
+                ssize_t length = sizeof(chunk) - 1; // 33 - 1
+                while(true)
+                {
+                  result = ::recv(curfd, chunk, length, 0);
+                  
+                  if(result < 0)        // error
+                  {
+                    int error = ::WSAGetLastError();
+                    if(error != NETEAGAIN && error != NETEWOULDBLOCK)
+                    {
+                      log::error << "> Error receiving data for socket " << curfd << "." << log::endl;
+                      log::error << ::gai_strerror(::WSAGetLastError()) << log::endl;
+                      log::warn << "> Closing connection on socket " << curfd << "." << log::endl;
+                      //FD_CLR(curfd, &ifdset);
+                      // @todo remove client from mClients
+                      // @todo throw exception
+                      // @todo emit -> new CErrorEvent(error)
+                      // @todo emit -> new CCloseEvent()
+                    }
+                    break;
+                  }
+                  else if(result == 0) // close connection
+                  {
+                    log::warn << "> Closing connection on socket " << curfd << "." << log::endl;
+                    //FD_CLR(curfd, &ifdset);
+                    // @todo remove client from mClients
+                    // @todo emit -> new CCloseEvent()
+                    break;
+                  }
+                  else                 // chunk complete
+                  {
+                    chunk[result] = '\0';
+                    msg.append(chunk);
+                    if(result < length || result > length)
+                    {
+                      break;
+                      // @todo build request
+                      // @todo emit -> new CRequestEvent(request)
+                    }
+                  }
+                }
+                
+                log::info << msg << log::endl;
+                
+                char resp[] = "HTTP/1.1 200 OK";
+                result = ::send(curfd, resp, sizeof(resp), 0);
+                if(result < 0)
+                {
+                  log::error << "> Error sending data for socket " << curfd << "." << log::endl;
+                  log::error << ::gai_strerror(::WSAGetLastError()) << log::endl;
+                }
+                else 
+                {
+                  log::info << "> Response sent on socket " << curfd << "." << log::endl;
+                }
+                
+                FD_CLR(curfd, &ifdset);
+                ::closesocket(curfd);
+              }
+            }
+          }
         }
         
-        break;
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+//        {
+//          CSocket*  sock = new CSocket(CSocket::INVALID);
+//          CMessage* msg  = new CMessage("request test");
+//          auto out = mClients.insert(std::move(std::make_pair(std::move(sock), std::move(std::make_pair(std::move(new CRequest(*sock, *msg)), std::move(new CResponse(*sock)))))));
+//          CEventEmmiter::emit(new CRequestEvent(*(out.first->second.first)));
+//          CEventEmmiter::emit(new CRequestEvent(*(out.first->second.first)));
+//          
+//          delete msg;
+//        }
       }
-      
-      // @todo Check all CResponse's
-      
-      std::this_thread::sleep_for(std::chrono::seconds(10));
       
       return *this;
     }
@@ -515,6 +717,23 @@ namespace http
     {
       mRoutes.push_back(std::make_tuple(EVerb::ALL, "", callback));
       return *this;
+    }
+  };
+
+  class CApp : public core::CApp
+  {
+    protected:
+    CServer& mServer;
+    
+    public:
+    CApp(CServer& server) : mServer(server)
+    {
+      log::info << "http::CApp::CApp(server)" << log::endl;
+    }
+    
+    void close()
+    {
+      mServer.close();
     }
   };
 }

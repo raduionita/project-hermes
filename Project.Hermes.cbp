@@ -7,7 +7,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin/Project" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/hermes" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -16,7 +16,7 @@
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="bin/Project" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/hermes" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -33,9 +33,11 @@
 			<Add directory="inc" />
 		</Compiler>
 		<Linker>
+			<Add option="-static" />
 			<Add library="lib/libws2_32.a" />
 		</Linker>
 		<Unit filename="inc/core.hpp" />
+		<Unit filename="inc/core/CApp.hpp" />
 		<Unit filename="inc/core/CEvent.hpp" />
 		<Unit filename="inc/core/CEventEmmiter.hpp" />
 		<Unit filename="inc/core/CException.hpp" />
@@ -49,10 +51,13 @@
 		<Unit filename="inc/net/CMessage.hpp" />
 		<Unit filename="inc/net/CServer.hpp" />
 		<Unit filename="inc/net/CSocket.hpp" />
+		<Unit filename="inc/os.hpp" />
+		<Unit filename="inc/watch.hpp" />
 		<Unit filename="src/core.cpp" />
 		<Unit filename="src/core/CTaskManager.cpp" />
 		<Unit filename="src/log/CLogger.cpp" />
 		<Unit filename="src/main.cpp" />
+		<Unit filename="src/watch.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

@@ -8,7 +8,9 @@ namespace log
 {
   extern CCoutLoggerStrategy cout;
   extern CLogger             log;
-  extern const std::string   tab;
+  extern const char          tab;
+  extern const char          cr;
+  extern const char          nl;
 
   extern ELevel info;
   extern ELevel debug;

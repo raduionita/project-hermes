@@ -13,6 +13,7 @@ char* inet_ntop6(const u_char *src, char *dst, socklen_t size);
 
 #define SOCKET_OK     0
 #define STATUS_OK     0
+#define STATUS_BAD   -1
 #define STATUS_CLOSED 0
 #define RESULT_BAD   -1
 #define RESULT_OK     0
@@ -20,6 +21,77 @@ char* inet_ntop6(const u_char *src, char *dst, socklen_t size);
 #define RESULT_EMPTY  0
 #define NOTHING       0
 #define ZERO          0
+
+// @todo Move inside and CError::EError enum
+#ifdef _WIN32_WINNT
+    #define NETEADDRINUSE        WSAEADDRINUSE
+    #define NETEAGAIN            WSAEWOULDBLOCK // WSAEAGAIN
+    #define NETEWOULDBLOCK        WSAEWOULDBLOCK
+    #define NETEALREADY        WSAEALREADY
+    #define NETEISCONN            WSAEISCONN
+    #define NETEINVAL            WSAEINVAL
+    #define NETEINPROGRESS        WSAEINPROGRESS
+    #define NETECONNRESET        WSAECONNRESET
+    #define NETEADDRNOTAVAIL    WSAEADDRNOTAVAIL
+    #define NETEAFNOSUPPORT    WSAEAFNOSUPPORT
+    #define NETECONNABORTED    WSAECONNABORTED
+    #define NETECONNREFUSED    WSAECONNREFUSED
+    #define NETEDESTADDRREQ    WSAEDESTADDRREQ
+    #define NETEFAULT            WSAEFAULT
+    #define NETEHOSTDOWN        WSAEHOSTDOWN
+    #define NETEHOSTUNREACH    WSAEHOSTUNREACH
+    #define NETEMFILE            WSAEMFILE
+    #define NETEMSGSIZE        WSAEMSGSIZE
+    #define NETENETDOWN        WSAENETDOWN
+    #define NETENETRESET        WSAENETRESET
+    #define NETENETUNREACH        WSAENETUNREACH
+    #define NETENOBUFS            WSAENOBUFS
+    #define NETENOTCONN        WSAENOTCONN
+    #define NETENOTSOCK        WSAENOTSOCK
+    #define NETEPFNOSUPPORT    WSAEPFNOSUPPORT
+    #define NETESHUTDOWN        WSAESHUTDOWN
+    #define NETETIMEDOUT        WSAETIMEDOUT
+    #define NETEHOST_NOT_FOUND    WSAHOST_NOT_FOUND
+    #define NETENO_RECOVERY    WSANO_RECOVERY
+    #define NETETRY_AGAIN        WSATRY_AGAIN
+    //Winsock specific
+    #define NETEPROCLIM            WSAEPROCLIM
+    #define NETENOTINITIALISED        WSANOTINITIALISED
+    #define NETESYSNOTREADY        WSASYSNOTREADY
+    #define NETEVERNOTSUPPORTED    WSAVERNOTSUPPORTED
+#else
+EWOULDBLOCK
+    #define NETEAGAIN           EAGAIN
+    #define NETEWOULDBLOCK      EWOULDBLOCK
+    #define NETEALREADY         EALREADY
+    #define NETEISCONN            EISCONN
+    #define NETEINVAL            EINVAL
+    #define NETEINPROGRESS        EINPROGRESS
+    #define NETECONNRESET        ECONNRESET
+    #define NETEADDRINUSE        EADDRINUSE
+    #define NETEADDRNOTAVAIL    EADDRNOTAVAIL
+    #define NETEAFNOSUPPORT    EAFNOSUPPORT
+    #define NETECONNABORTED    ECONNABORTED
+    #define NETECONNREFUSED    ECONNREFUSED
+    #define NETEDESTADDRREQ    EDESTADDRREQ
+    #define NETEFAULT            EFAULT
+    #define NETEHOSTDOWN        EHOSTDOWN
+    #define NETEHOSTUNREACH    EHOSTUNREACH
+    #define NETEMFILE            EMFILE
+    #define NETEMSGSIZE        EMSGSIZE
+    #define NETENETDOWN        ENETDOWN
+    #define NETENETRESET        ENETRESET
+    #define NETENETUNREACH        ENETUNREACH
+    #define NETENOBUFS            ENOBUFS
+    #define NETENOTCONN        ENOTCONN
+    #define NETENOTSOCK        ENOTSOCK
+    #define NETEPFNOSUPPORT    EPFNOSUPPORT
+    #define NETESHUTDOWN        ESHUTDOWN
+    #define NETETIMEDOUT        ETIMEDOUT
+    #define NETEHOST_NOT_FOUND    HOST_NOT_FOUND
+    #define NETENO_RECOVERY    NO_RECOVERY
+    #define NETETRY_AGAIN        TRY_AGAIN
+#endif
 
 namespace net
 {
@@ -75,6 +147,21 @@ namespace net
     IRDA      = AF_IRDA,      // 26 - infrared
     //BTH       = AF_BTH,     // 32 - bluetooth
   };
+
+  inline constexpr bool operator == (int i, EProtocol a)
+  {
+    return i == static_cast<int>(a);
+  }
+  
+  inline constexpr bool operator == (int i, ESocketType a)
+  {
+    return i == static_cast<int>(a);
+  }
+  
+  inline constexpr bool operator == (int i, EAddressType a)
+  {
+    return i == static_cast<int>(a);
+  }
 }
 
 using namespace net;
