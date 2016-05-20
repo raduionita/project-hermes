@@ -5,7 +5,7 @@
 	<watch.hpp>
 	<thread>
 
-1463674491 c:\workspace\cpp\project.hermes\inc\http.hpp
+1463754946 c:\workspace\cpp\project.hermes\inc\http.hpp
 	<core/CEvent.hpp>
 	<core/CEventEmmiter.hpp>
 	<core/CSynchronizable.hpp>
@@ -14,29 +14,32 @@
 	<net/CServer.hpp>
 	<net/CSocket.hpp>
 	<net/CMessage.hpp>
+	<net/CError.hpp>
 	<watch.hpp>
 	<functional>
 	<map>
 	<tuple>
 	<vector>
 	<string>
+	<memory>
 
 1463473669 c:\workspace\cpp\project.hermes\inc\core.hpp
 	<string>
 
-1463674183 c:\workspace\cpp\project.hermes\inc\net.hpp
+1463747421 c:\workspace\cpp\project.hermes\inc\net.hpp
 	<ws2tcpip.h>
 	<errno.h>
 	<core.hpp>
 	<cstddef>
 	<cstdio>
 
-1463069198 c:\workspace\cpp\project.hermes\inc\net\cserver.hpp
+1463748645 c:\workspace\cpp\project.hermes\inc\net\cserver.hpp
 	<net.hpp>
 	<net/CSocket.hpp>
+	<net/CError.hpp>
 	<core/CException.hpp>
 
-1463673063 c:\workspace\cpp\project.hermes\inc\net\csocket.hpp
+1463755256 c:\workspace\cpp\project.hermes\inc\net\csocket.hpp
 	<net.hpp>
 	<core/CException.hpp>
 
@@ -126,4 +129,11 @@
 
 1463487867 source:c:\workspace\cpp\project.hermes\src\watch.cpp
 	<watch.hpp>
+
+1463741888 c:\workspace\cpp\project.hermes\inc\net\cerror.hpp
+	<net.hpp>
+	<core/CError.hpp>
+
+1463742004 c:\workspace\cpp\project.hermes\inc\core\cerror.hpp
+	<core.hpp>
 

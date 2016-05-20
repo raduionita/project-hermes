@@ -166,6 +166,12 @@ namespace net
 
 using namespace net;
 
+#ifdef _WIN32_WINNT
+  __stdcall int(*close)(SOCKET) = &closesocket;
+#else // LINUX
+  // already has a ::close()
+#endif // _WIN32_WINNT
+
 /**
  * @param sockaddr_t
  */

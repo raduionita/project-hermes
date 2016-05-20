@@ -60,132 +60,7 @@ namespace net
     : mSocket(INVALID_SOCKET)
     {
       log::info << "net::CSocket::CSocket(type, port, host, protocol, addresstype, limit)" << log::endl;
-      
-      ulong      temp = 1;
-      status_t   status;
-      addrinfo_t hints,
-               * srvinfo = NULL,
-               * ptr     = NULL;
-      ::memset(&hints, 0, sizeof(hints));
-      hints.ai_family   = static_cast<int>(addresstype);                          // UNSPEC
-      hints.ai_socktype = static_cast<int>(protocol == EProtocol::TCP ? ESocketType::TCP : ESocketType::UDP);
-      hints.ai_flags    = type == EType::SERVER ? AI_PASSIVE : 0;                 // server
-      hints.ai_protocol = type == EType::CLIENT ? static_cast<int>(protocol) : 0; // client
-      
-      // use hints to get an address
-      // NULL => 0.0.0.0 => bind to every ip on this machine
-      status = ::getaddrinfo(host, std::to_string((uint)port).c_str(), &hints, &srvinfo);
-      if(status != STATUS_OK)
-      {
-        throw CException(::gai_strerror(WSAGetLastError()), __FILE__, __LINE__);
-      }
-
-      // find and bind/connect to an address
-      for(ptr = srvinfo; ptr != NULL; ptr = ptr->ai_next)
-      {
-        //          socket(EAddressType,   ESocketType,      EProtocol);
-        mSocket = ::socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
-        if(mSocket == INVALID_SOCKET)
-        {
-          log::error << "> Error socket " << mSocket << ":" << gai_strerror(WSAGetLastError()) << "." << log::endl;
-          continue;
-        }
-
-        // prevent "address in use" error
-        ::setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, "1", sizeof(int));
-        
-        // non-blocking
-#ifdef _WIN32_WINNT
-        temp = 1;
-        ::ioctlsocket(mSocket, FIONBIO, &temp);
-#else // *UNIX
-        temp = ::fcntl(mSocket, F_GETFL, 0);
-        ::fcntl(mSocket, F_SETFL, temp | O_NONBLOCK);
-#endif // _WIN32_WINNT
-
-        // bind/connect
-        if(type == EType::CLIENT)
-        {
-          status = ::connect(mSocket, ptr->ai_addr, (int)(ptr->ai_addrlen));
-          if(status == SOCKET_ERROR)
-          {
-            log::error << "> Error connect: " << gai_strerror(WSAGetLastError()) << "." << log::endl;
-            ::closesocket(mSocket);
-            mSocket = INVALID_SOCKET;
-            continue;
-          }
-          log::info << "> Connection to socket " << mSocket << "." << log::endl;
-        }
-        else // EType::SERVER
-        {
-          status = ::bind(mSocket, ptr->ai_addr, ptr->ai_addrlen);
-          if(status == STATUS_OK)
-          {
-            char      host[NI_MAXHOST];
-            char      serv[NI_MAXSERV];
-            socklen_t alen = ptr->ai_family == EAddressType::IPV4 ? sizeof(sockaddr_in_t) : sizeof(sockaddr_in6_t);
-            status = ::getnameinfo(ptr->ai_addr, alen, host, NI_MAXHOST, serv, NI_MAXSERV, NI_NUMERICSERV | NI_NUMERICHOST);
-            if (status == STATUS_OK)
-            {
-              host[NI_MAXHOST-1] = '\0';
-              serv[NI_MAXSERV-1] = '\0';
-              log::info << "> Binding to socket " << mSocket << " on " << host << ":" << serv << "." << log::endl;
-            }
-            else
-            {
-              log::error << "> Error getnameinfo(). " << gai_strerror(WSAGetLastError()) << log::endl;
-            }
-          }
-          else // SOCKET_ERROR
-          {
-            log::error << "> Error bind: " << gai_strerror(WSAGetLastError()) << "." << log::endl;
-            ::closesocket(mSocket);
-            mSocket = INVALID_SOCKET;
-            continue;
-          }
-        }
-        break;
-      }
-
-      // if no addrinfo OR no socket => error
-      if(ptr == NULL || mSocket == INVALID_SOCKET)
-      {
-        throw CException(::gai_strerror(WSAGetLastError()), __FILE__, __LINE__);
-      }
-
-      // free srvinfo from memory
-      ::freeaddrinfo(srvinfo);
-
-      if(type == EType::CLIENT)
-      {
-        // do nothing...
-      }
-      else // EType::SERVER
-      {
-        if(protocol == EProtocol::TCP)
-        {
-          // server: put socket in listening mode
-          if(::listen(mSocket, limit) != SOCKET_OK)
-          {
-            throw CException(::gai_strerror(WSAGetLastError()), __FILE__, __LINE__);
-          }
-          if(ptr->ai_family == EAddressType::IPV4)
-          {
-            sockaddr_in_t sin;
-            socklen_t len = sizeof(sin);
-            ::getsockname(mSocket, (sockaddr_t*)(&sin), &len);
-            log::info << "> Listening to socket " << mSocket << " on port " << ::ntohs(sin.sin_port) << "." << log::endl;
-          }
-          else 
-          {
-            sockaddr_in6_t sin6;
-            socklen_t len = sizeof(sin6);
-            ::getsockname(mSocket, (sockaddr_t*)(&sin6), &len);
-            log::info << "> Listening to socket " << mSocket << " on port " << ::ntohs(sin6.sin6_port) << "." << log::endl;
-
-          }
-        }
-      }
+      mSocket = build(type, port, host, protocol, addresstype, limit);
     }
     
     CSocket(const CSocket& that)
@@ -246,7 +121,7 @@ namespace net
     {
       log::info << "net::CSocket::close()" << log::endl;
       // OR ::close()
-      ::closesocket(mSocket);
+      ::close(mSocket);
       if(mSocket == CSocket::INVALID)
         log::info << "> Closing socket " << "INVALID" << "." << log::endl;
       else
@@ -256,6 +131,140 @@ namespace net
     bool bound()
     {
       return mSocket != INVALID_SOCKET;
+    }
+    
+    static socket_t build(EType type, port_t port, const char* host, EProtocol protocol = EProtocol::TCP, EAddressType addresstype = EAddressType::UNSPEC, int limit = SOMAXCONN)
+    {
+      log::info << "net::CSocket::build(type, port, host, protocol, addresstype, limit)" << log::endl;
+      
+      socket_t   sock = INVALID_SOCKET;
+      ulong      temp = 1;
+      status_t   status;
+      addrinfo_t hints,
+               * srvinfo = NULL,
+               * ptr     = NULL;
+      ::memset(&hints, 0, sizeof(hints));
+      hints.ai_family   = static_cast<int>(addresstype);                          // UNSPEC
+      hints.ai_socktype = static_cast<int>(protocol == EProtocol::TCP ? ESocketType::TCP : ESocketType::UDP);
+      hints.ai_flags    = type == EType::SERVER ? AI_PASSIVE : 0;                 // server
+      hints.ai_protocol = type == EType::CLIENT ? static_cast<int>(protocol) : 0; // client
+      
+      // use hints to get an address
+      // NULL => 0.0.0.0 => bind to every ip on this machine
+      status = ::getaddrinfo(host, std::to_string((uint)port).c_str(), &hints, &srvinfo);
+      if(status != STATUS_OK)
+      {
+        throw CException(::gai_strerror(WSAGetLastError()), __FILE__, __LINE__);
+      }
+
+      // find and bind/connect to an address
+      for(ptr = srvinfo; ptr != NULL; ptr = ptr->ai_next)
+      {
+        //          socket(EAddressType,   ESocketType,      EProtocol);
+        sock = ::socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+        if(sock == INVALID_SOCKET)
+        {
+          log::error << "> Error socket " << sock << ":" << gai_strerror(WSAGetLastError()) << "." << log::endl;
+          continue;
+        }
+
+        // prevent "address in use" error
+        ::setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, "1", sizeof(int));
+        
+        // non-blocking
+#ifdef _WIN32_WINNT
+        temp = 1;
+        ::ioctlsocket(sock, FIONBIO, &temp);
+#else // *UNIX
+        temp = ::fcntl(sock, F_GETFL, 0);
+        ::fcntl(sock, F_SETFL, temp | O_NONBLOCK);
+#endif // _WIN32_WINNT
+
+        // bind/connect
+        if(type == EType::CLIENT)
+        {
+          status = ::connect(sock, ptr->ai_addr, (int)(ptr->ai_addrlen));
+          if(status == SOCKET_ERROR)
+          {
+            log::error << "> Error connect: " << gai_strerror(WSAGetLastError()) << "." << log::endl;
+            ::close(sock);
+            sock = INVALID_SOCKET;
+            continue;
+          }
+          log::info << "> Connection to socket " << sock << "." << log::endl;
+        }
+        else // EType::SERVER
+        {
+          status = ::bind(sock, ptr->ai_addr, ptr->ai_addrlen);
+          if(status == STATUS_OK)
+          {
+            char      host[NI_MAXHOST];
+            char      serv[NI_MAXSERV];
+            socklen_t alen = ptr->ai_family == EAddressType::IPV4 ? sizeof(sockaddr_in_t) : sizeof(sockaddr_in6_t);
+            status = ::getnameinfo(ptr->ai_addr, alen, host, NI_MAXHOST, serv, NI_MAXSERV, NI_NUMERICSERV | NI_NUMERICHOST);
+            if (status == STATUS_OK)
+            {
+              host[NI_MAXHOST-1] = '\0';
+              serv[NI_MAXSERV-1] = '\0';
+              log::info << "> Binding to socket " << sock << " on " << host << ":" << serv << "." << log::endl;
+            }
+            else
+            {
+              log::error << "> Error getnameinfo(). " << gai_strerror(WSAGetLastError()) << log::endl;
+            }
+          }
+          else // SOCKET_ERROR
+          {
+            log::error << "> Error bind: " << gai_strerror(WSAGetLastError()) << "." << log::endl;
+            ::close(sock);
+            sock = INVALID_SOCKET;
+            continue;
+          }
+        }
+        break;
+      }
+
+      // if no addrinfo OR no socket => error
+      if(ptr == NULL || sock == INVALID_SOCKET)
+      {
+        throw CException(::gai_strerror(WSAGetLastError()), __FILE__, __LINE__);
+      }
+
+      // free srvinfo from memory
+      ::freeaddrinfo(srvinfo);
+
+      if(type == EType::CLIENT)
+      {
+        // do nothing...
+      }
+      else // EType::SERVER
+      {
+        if(protocol == EProtocol::TCP)
+        {
+          // server: put socket in listening mode
+          if(::listen(sock, limit) != SOCKET_OK)
+          {
+            throw CException(::gai_strerror(WSAGetLastError()), __FILE__, __LINE__);
+          }
+          if(ptr->ai_family == EAddressType::IPV4)
+          {
+            sockaddr_in_t sin;
+            socklen_t len = sizeof(sin);
+            ::getsockname(sock, (sockaddr_t*)(&sin), &len);
+            log::info << "> Listening to socket " << sock << " on port " << ::ntohs(sin.sin_port) << "." << log::endl;
+          }
+          else 
+          {
+            sockaddr_in6_t sin6;
+            socklen_t len = sizeof(sin6);
+            ::getsockname(sock, (sockaddr_t*)(&sin6), &len);
+            log::info << "> Listening to socket " << sock << " on port " << ::ntohs(sin6.sin6_port) << "." << log::endl;
+
+          }
+        }
+      }
+      
+      return sock;
     }
     
     // getHost()

@@ -11,6 +11,7 @@
 #include <net/CServer.hpp>
 #include <net/CSocket.hpp>
 #include <net/CMessage.hpp>
+#include <net/CError.hpp>
 
 #include <watch.hpp>
 
@@ -19,6 +20,7 @@
 #include <tuple>
 #include <vector>
 #include <string>
+#include <memory>
 
 // @todo replace ::WSAGetLastError() with a define or something...
 
@@ -111,7 +113,7 @@ namespace http
     typedef       std::string value_t;
     
     protected:
-    CSocket&                       mSocket;
+    socket_t                       mSocket;
     watch::milliseconds            mTime;
     EVerb                          mVerb;
     std::string                    mPath;
@@ -153,7 +155,7 @@ namespace http
     }
     
     public:
-    CSocket& socket() const
+    socket_t socket() const
     {
       return mSocket;
     }
@@ -198,7 +200,7 @@ namespace http
   class CResponse : public core::CSynchronizable
   {
     protected:
-    CSocket&                       mSocket;
+    socket_t                       mSocket;
     watch::milliseconds            mTime;
     std::map<EHead, std::string>   mHead;
     std::string                    mBody;
@@ -227,7 +229,7 @@ namespace http
     }
     
     public:
-    CSocket& socket() const
+    socket_t socket() const
     {
       return mSocket;
     }
@@ -323,11 +325,14 @@ namespace http
 
   class CRequestEvent : public CEvent
   {
+    typedef std::shared_ptr<CRequest>  request_t;
+    typedef std::shared_ptr<CResponse> response_t;
+  
     public:
-    CRequest& mRequest;
+    request_t mRequest;
     
     public:
-    CRequestEvent(CRequest& request) : CEvent("request"), mRequest(request)
+    CRequestEvent(request_t request) : CEvent("request"), mRequest(request)
     {
       log::info << "http::CRequestEvent::CRequestEvent(request)" << log::endl;
     }
@@ -335,11 +340,15 @@ namespace http
   
   class CServer : public net::AServer, public CEventEmmiter
   {
-    typedef std::pair<CRequest*, CResponse*> client_t;
+    typedef std::shared_ptr<CRequest>        request_t;
+    typedef std::shared_ptr<CResponse>       response_t;
+    typedef std::pair<request_t, response_t> client_t;
+    typedef net::CServer self;
+    typedef net::AServer parent;
     
     protected:
     net::CSocket*                mServer;  // ptr::shared<CSocket> mServer;
-    std::map<CSocket*, client_t> mClients; // @todo Need shared pointers
+    std::map<socket_t, client_t> mClients; // @todo Need shared pointers
     
     public:
     port_t         mPort;    // 80, 8080
@@ -376,7 +385,7 @@ namespace http
         {
           if(it->second.first == nullptr || it->second.second == nullptr)
           {
-            it->first->close();
+            ::close(it->first);
             mClients.erase(it++);
           }
           else
@@ -385,10 +394,9 @@ namespace http
             {
               log::info << "> Removing client... " << log::endl;
             
-              /* CResponse* */     delete it->second.second; it->second.second = nullptr;
-              /* CRequest* */      delete it->second.first;  it->second.first  = nullptr;
-              it->first->close();
-              /* const CSocket* */ delete it->first;      // it->first = nullptr;
+              // /* CResponse* */     delete it->second.second; it->second.second = nullptr;
+              // /* CRequest* */      delete it->second.first;  it->second.first  = nullptr;
+              ::close(it->first);
               
               mClients.erase(it++);
             }
@@ -530,8 +538,10 @@ namespace http
                 {
                   minfd = std::min(newfd, minfd);
                   maxfd = std::max(newfd, maxfd);
+                  
                   FD_SET(newfd, &ifdset);
-                  mClients.insert(std::move(std::make_pair(std::move(new CSocket(newfd)), std::make_pair(nullptr, nullptr))));
+                  mClients[newfd]; // touch
+                  // mClients.insert(std::make_pair(newfd, std::make_pair(nullptr, nullptr)));
                   //CEventEmmiter::emit(new CConnectionEvent(con));
                 }
               }
@@ -539,22 +549,24 @@ namespace http
               {
                 log::info << "> Incoming message from socket " << curfd << "." << log::endl;
                 
-                std::string msg;
-                char    chunk[32 + 1];
-                ssize_t length = sizeof(chunk) - 1; // 33 - 1
+                std::string buffer;
+                char        chunk[4096 + 1];
+                ssize_t     length = sizeof(chunk) - 1; // 33 - 1
                 while(true)
                 {
                   result = ::recv(curfd, chunk, length, 0);
                   
                   if(result < 0)        // error
                   {
-                    int error = ::WSAGetLastError();
-                    if(error != NETEAGAIN && error != NETEWOULDBLOCK)
+                    if(error() != net::CError::WOULDBLOCK && error() != net::CError::AGAIN)
                     {
                       log::error << "> Error receiving data for socket " << curfd << "." << log::endl;
-                      log::error << ::gai_strerror(::WSAGetLastError()) << log::endl;
+                      log::error << error() << log::endl;
                       log::warn << "> Closing connection on socket " << curfd << "." << log::endl;
-                      //FD_CLR(curfd, &ifdset);
+                      FD_CLR(curfd, &ifdset);
+                      ::close(curfd);
+                      mClients.erase(curfd);
+
                       // @todo remove client from mClients
                       // @todo throw exception
                       // @todo emit -> new CErrorEvent(error)
@@ -565,7 +577,9 @@ namespace http
                   else if(result == 0) // close connection
                   {
                     log::warn << "> Closing connection on socket " << curfd << "." << log::endl;
-                    //FD_CLR(curfd, &ifdset);
+                    FD_CLR(curfd, &ifdset);
+                    ::close(curfd);
+                    mClients.erase(curfd);
                     // @todo remove client from mClients
                     // @todo emit -> new CCloseEvent()
                     break;
@@ -573,7 +587,7 @@ namespace http
                   else                 // chunk complete
                   {
                     chunk[result] = '\0';
-                    msg.append(chunk);
+                    buffer.append(chunk);
                     if(result < length || result > length)
                     {
                       break;
@@ -583,7 +597,7 @@ namespace http
                   }
                 }
                 
-                log::info << msg << log::endl;
+                log::info << buffer << log::endl;
                 
                 char resp[] = "HTTP/1.1 200 OK";
                 result = ::send(curfd, resp, sizeof(resp), 0);
@@ -598,7 +612,8 @@ namespace http
                 }
                 
                 FD_CLR(curfd, &ifdset);
-                ::closesocket(curfd);
+                ::close(curfd);
+                mClients.erase(curfd);
               }
             }
           }
@@ -619,7 +634,7 @@ namespace http
 //        {
 //          CSocket*  sock = new CSocket(CSocket::INVALID);
 //          CMessage* msg  = new CMessage("request test");
-//          auto out = mClients.insert(std::move(std::make_pair(std::move(sock), std::move(std::make_pair(std::move(new CRequest(*sock, *msg)), std::move(new CResponse(*sock)))))));
+//          auto out = mClients.insert(std::make_pair(sock, std::make_pair(std::make_shared<CRequest>(*sock, *msg), new CResponse(*sock))));
 //          CEventEmmiter::emit(new CRequestEvent(*(out.first->second.first)));
 //          CEventEmmiter::emit(new CRequestEvent(*(out.first->second.first)));
 //          
@@ -636,8 +651,8 @@ namespace http
       
       CEventEmmiter::add(label, [this, callback](const CEvent* e) {
         const CRequestEvent* re = dynamic_cast<const CRequestEvent*>(e);
-        CRequest*  req = &(re->mRequest);
-        CResponse* res = mClients[&(req->socket())].second;
+        const request_t&  req = re->mRequest;
+        const response_t& res = mClients[req->socket()].second;
         
         synchronized(*res) // prevent threads with same response from overwriting each other
         {
