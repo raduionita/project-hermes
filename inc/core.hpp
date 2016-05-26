@@ -14,6 +14,12 @@ namespace core
   using label_t = std::string;
   
   void noop(void);
+  
+  void inline tolower(std::string& src)
+  {
+    for(size_t i = 0; i < src.size(); ++i)
+      src[i] = src[i] > 0x40 && src[i] < 0x5B ? src[i] | 0x60 : src[i];
+  }
 }
 
 /*

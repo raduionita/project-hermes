@@ -11,6 +11,7 @@ namespace net
   {
     public:
     std::string mMessage;
+    EProtocol   mProtocol;
     
     public:
     CMessage()
@@ -76,8 +77,24 @@ namespace net
     }
     
     public:
-    CMessage& append(const char* chunk, size_t length);
-    CMessage& append(const char ch);
+    CMessage& append(const char* chunk)
+    {
+      mMessage.append(chunk);
+      return *this;
+    }
+    
+    CMessage& append(const char ch)
+    {
+      // @todo Finish this
+      return *this;
+    }
+    
+    CMessage& clear()
+    {
+      mMessage.erase();
+      return *this;
+    }
+    
     CMessage& status(status_t status);
     status_t  status() const;
     

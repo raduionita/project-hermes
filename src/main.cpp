@@ -1,8 +1,9 @@
-#include <http.hpp>
+#include <http/CServer.hpp>
 #include <os.hpp>
 #include <watch.hpp>
 
 #include <thread>
+#include <sstream>
 
 int main(int argc, char** argv)
 {
@@ -11,18 +12,25 @@ int main(int argc, char** argv)
   http::CServer  server;
   http::CRouter  router(server);
   http::CApp     app(server);
-  router.match(http::ALL, [](http::CRequest& req, http::CResponse& res) {
-    res.type(http::JSON);
-    log::info << "> Router match" << log::endl;
+  router.match(http::GET, "/favicon.ico", [](http::CRequest& req, http::CResponse& res) {
+    log::info << "> /favicon.ico" << log::endl;
+    log::info << "> " << req.head(http::HOST) << log::endl;
+    res.type(http::ICON);
+    res.end();
   });
-  server.on("request", [](http::CRequest& req, http::CResponse& res) {
-    std::this_thread::sleep_for(std::chrono::seconds(2));
-    log::info << ("> Server request: ") << req.body() << " Response type: " << res.type() << log::endl;
+  router.match(http::GET, [](http::CRequest& req, http::CResponse& res) {
+    log::info << "> " << req.path() << log::endl;
+    log::info << "> " << req.head(http::HOST) << log::endl;
+    res.type(http::HTML);
+    std::stringstream output;
+    output << "<html><head><title>It works!</title></head><body><h3>It works!</h3><code>" << req.head(http::USERAGENT) << "</code></body>";
+    res.send(output.str());
+    res.end();
   });
   server.listen([]() {
     log::info << "> Listening." << log::endl;
   });
-
+  
   return 0;
 }
 

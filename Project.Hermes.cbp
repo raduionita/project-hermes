@@ -46,6 +46,9 @@
 		<Unit filename="inc/core/CTaskManager.hpp" />
 		<Unit filename="inc/core/TSingleton.hpp" />
 		<Unit filename="inc/http.hpp" />
+		<Unit filename="inc/http/CRequest.hpp" />
+		<Unit filename="inc/http/CResponse.hpp" />
+		<Unit filename="inc/http/CServer.hpp" />
 		<Unit filename="inc/log.hpp" />
 		<Unit filename="inc/log/CLogger.hpp" />
 		<Unit filename="inc/net.hpp" />
