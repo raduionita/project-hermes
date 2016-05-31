@@ -10,7 +10,7 @@ namespace net
 
   class CError : public core::CError
   {
-    friend class AServer;
+    friend CError& getError();
   
     public:
     using core::CError::CError;
@@ -57,6 +57,24 @@ namespace net
       VERNOTSUPPORTED = NETEVERNOTSUPPORTED
     };
   };
+  
+  inline CError& getError() // careful with CError&, the reference might get lost or something...
+  {
+    static CError error;
+    
+#ifdef _WIN32_WINNT
+    int   code    = ::WSAGetLastError();
+    char* message = ::gai_strerror(code);
+#else // LINUX
+    int   code    = errno;
+    char* message = ::strerror(code);
+#endif // _WIN32_WINNT
+    
+    error.mCode    = code;
+    error.mMessage = message;
+
+    return error;
+  }
 }
 
 

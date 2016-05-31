@@ -1,30 +1,96 @@
 #include <http/CServer.hpp>
-#include <os.hpp>
-#include <watch.hpp>
+#include <http/CRouter.hpp>
+#include <http/CApp.hpp>
+#include <http/CFileSystem.hpp>
 
-#include <thread>
 #include <sstream>
+#include <fstream>
 
 int main(int argc, char** argv)
 {
   log::info << "::main(argc, argv)" << log::endl;
   
-  http::CServer  server;
-  http::CRouter  router(server);
-  http::CApp     app(server);
+  // http::CServer     srv;
+  // http::CApp        app(srv);
+  // http::CFileSystem filesystem;
+  // app.use(filesystem);
+  // app.match(http::GET, "/path", [](http::CRequest& req, http::CResponse& res) { });
+  // srv.on("close", ...);
+  
+  http::CServer     server;          // http::server()
+  http::CRouter     router(server);  // http::route(server)
+  http::CApp        app(server);     // for handling system events
+  
   router.match(http::GET, "/favicon.ico", [](http::CRequest& req, http::CResponse& res) {
-    log::info << "> /favicon.ico" << log::endl;
-    log::info << "> " << req.head(http::HOST) << log::endl;
+    log::info << "> " << req.head(http::HOST) << " /favicon.ico" << log::endl;
+    
     res.type(http::ICON);
+    
+    std::ifstream ifs("favicon.ico", std::ios::binary | std::ios::in);
+    if(ifs) 
+    {
+      std::string output;
+      ifs.seekg(0, std::ios::end);
+      //output.reserve(ifs.tellg());
+      ifs.seekg(0, std::ios::beg);
+      //output.assign(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>());
+    
+      res.status(http::OK);
+      res.send(output);
+    }
+    else
+    {
+      res.status(http::NOTFOUND);
+      log::warn << "> Cannot open file!" << log::endl;
+    }
+    
+    res.end();
+  });  
+  router.match(http::GET, "/css/styles.css", [](http::CRequest& req, http::CResponse& res) {
+    log::info << "> " << req.head(http::HOST) << " /css/styles.css" << log::endl;
+    
+    res.type(http::CSS);
+    
+    std::ifstream ifs("css/styles.css", std::ios::binary | std::ios::in);
+    if(ifs) 
+    {
+      std::stringstream ss;
+      ss << ifs.rdbuf();
+      res.status(http::OK);
+      res.send(ss.str());
+    }
+    else
+    {
+      res.status(http::NOTFOUND);
+      log::warn << "> Cannot open file!" << log::endl;
+    }
+    
     res.end();
   });
   router.match(http::GET, [](http::CRequest& req, http::CResponse& res) {
-    log::info << "> " << req.path() << log::endl;
-    log::info << "> " << req.head(http::HOST) << log::endl;
+    log::info << "> " << req.head(http::HOST) << " " << req.path()  << log::endl;
+    
     res.type(http::HTML);
-    std::stringstream output;
-    output << "<html><head><title>It works!</title></head><body><h3>It works!</h3><code>" << req.head(http::USERAGENT) << "</code></body>";
-    res.send(output.str());
+    
+    std::ifstream ifs("index.html", std::ios::binary | std::ios::in);
+    if(ifs) 
+    {
+      std::stringstream ss;
+      ss << ifs.rdbuf();
+      res.status(http::OK);
+      res.send(ss.str());
+    }
+    else
+    {
+      res.status(http::NOTFOUND);
+      log::warn << "> Cannot open file!" << log::endl;
+    }
+    
+    res.end();
+    
+    //res.send(file::read("relative/path/to/file", file::UTF8));
+    //res.send(tpl::render("relative/path/to/template", data));
+    
     res.end();
   });
   server.listen([]() {

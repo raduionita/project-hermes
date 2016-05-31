@@ -46,8 +46,13 @@
 		<Unit filename="inc/core/CTaskManager.hpp" />
 		<Unit filename="inc/core/TSingleton.hpp" />
 		<Unit filename="inc/http.hpp" />
+		<Unit filename="inc/http/AMiddleware.hpp" />
+		<Unit filename="inc/http/CApp.hpp" />
+		<Unit filename="inc/http/CFileSystem.hpp" />
 		<Unit filename="inc/http/CRequest.hpp" />
+		<Unit filename="inc/http/CRequestEvent.hpp" />
 		<Unit filename="inc/http/CResponse.hpp" />
+		<Unit filename="inc/http/CRouter.hpp" />
 		<Unit filename="inc/http/CServer.hpp" />
 		<Unit filename="inc/log.hpp" />
 		<Unit filename="inc/log/CLogger.hpp" />
@@ -58,11 +63,7 @@
 		<Unit filename="inc/net/CSocket.hpp" />
 		<Unit filename="inc/os.hpp" />
 		<Unit filename="inc/watch.hpp" />
-		<Unit filename="src/core.cpp" />
-		<Unit filename="src/core/CTaskManager.cpp" />
-		<Unit filename="src/log/CLogger.cpp" />
 		<Unit filename="src/main.cpp" />
-		<Unit filename="src/watch.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

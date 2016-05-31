@@ -2,80 +2,215 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
-	<File name="inc\net\CError.hpp" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="inc\http\CRequestEvent.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="422" topLine="0" />
+			<Cursor1 position="123" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="src\log\CLogger.cpp" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="inc\http\CResponse.hpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="908" topLine="18" />
+			<Cursor1 position="736" topLine="0" />
 		</Cursor>
 		<Folding>
-			<Collapse line="72" />
-			<Collapse line="75" />
-			<Collapse line="131" />
-			<Collapse line="141" />
+			<Collapse line="111" />
+			<Collapse line="113" />
+			<Collapse line="117" />
+			<Collapse line="125" />
+			<Collapse line="130" />
+			<Collapse line="136" />
+			<Collapse line="143" />
+			<Collapse line="148" />
+			<Collapse line="152" />
+			<Collapse line="167" />
+			<Collapse line="171" />
 		</Folding>
-	</File>
-	<File name="src\main.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="191" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="inc\core\CTaskManager.hpp" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="353" topLine="3" />
-		</Cursor>
-	</File>
-	<File name="inc\core.hpp" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="459" topLine="0" />
-		</Cursor>
-		<Folding>
-			<Collapse line="24" />
-		</Folding>
-	</File>
-	<File name="inc\core\CEvent.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="352" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="src\watch.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="46" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="inc\core\TSingleton.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="214" topLine="0" />
-		</Cursor>
 	</File>
 	<File name="inc\core\CEventEmmiter.hpp" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="480" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="inc\http.hpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
+	<File name="inc\http\CServer.hpp" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="4733" topLine="17" />
+			<Cursor1 position="190" topLine="0" />
 		</Cursor>
 		<Folding>
-			<Collapse line="26" />
 			<Collapse line="34" />
-			<Collapse line="48" />
+			<Collapse line="55" />
+			<Collapse line="61" />
+			<Collapse line="66" />
 			<Collapse line="70" />
-			<Collapse line="105" />
+			<Collapse line="78" />
+			<Collapse line="80" />
+			<Collapse line="85" />
+			<Collapse line="87" />
+			<Collapse line="97" />
+			<Collapse line="101" />
+			<Collapse line="109" />
+			<Collapse line="119" />
+			<Collapse line="131" />
+			<Collapse line="135" />
+			<Collapse line="139" />
+			<Collapse line="146" />
+			<Collapse line="152" />
+			<Collapse line="158" />
+			<Collapse line="165" />
+			<Collapse line="189" />
+			<Collapse line="205" />
+			<Collapse line="211" />
+			<Collapse line="215" />
+			<Collapse line="217" />
+			<Collapse line="219" />
+			<Collapse line="228" />
+			<Collapse line="234" />
+			<Collapse line="240" />
+			<Collapse line="244" />
+			<Collapse line="249" />
+			<Collapse line="263" />
+			<Collapse line="265" />
+			<Collapse line="269" />
+			<Collapse line="274" />
+			<Collapse line="285" />
+			<Collapse line="293" />
+			<Collapse line="297" />
+			<Collapse line="300" />
+			<Collapse line="320" />
+			<Collapse line="330" />
+			<Collapse line="334" />
+			<Collapse line="352" />
+			<Collapse line="355" />
+			<Collapse line="361" />
+			<Collapse line="371" />
+			<Collapse line="377" />
+			<Collapse line="382" />
 		</Folding>
+	</File>
+	<File name="inc\core\CError.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="120" topLine="15" />
+		</Cursor>
+		<Folding>
+			<Collapse line="18" />
+			<Collapse line="23" />
+			<Collapse line="28" />
+			<Collapse line="33" />
+			<Collapse line="38" />
+		</Folding>
+	</File>
+	<File name="inc\http.hpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="559" topLine="33" />
+		</Cursor>
+	</File>
+	<File name="inc\core\CTaskManager.hpp" open="1" top="1" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1632" topLine="39" />
+		</Cursor>
+		<Folding>
+			<Collapse line="18" />
+			<Collapse line="81" />
+			<Collapse line="95" />
+			<Collapse line="120" />
+		</Folding>
+	</File>
+	<File name="inc\watch.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="514" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="inc\log.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="285" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="inc\core\TSingleton.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="630" topLine="0" />
+		</Cursor>
+		<Folding>
+			<Collapse line="9" />
+			<Collapse line="15" />
+			<Collapse line="21" />
+			<Collapse line="26" />
+		</Folding>
+	</File>
+	<File name="inc\log\CLogger.hpp" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2620" topLine="93" />
+		</Cursor>
+		<Folding>
+			<Collapse line="48" />
+			<Collapse line="54" />
+			<Collapse line="76" />
+			<Collapse line="97" />
+			<Collapse line="140" />
+		</Folding>
+	</File>
+	<File name="inc\net\CMessage.hpp" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="139" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="inc\net.hpp" open="0" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="5912" topLine="111" />
+		</Cursor>
+		<Folding>
+			<Collapse line="118" />
+			<Collapse line="130" />
+			<Collapse line="139" />
+		</Folding>
+	</File>
+	<File name="inc\net\CError.hpp" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2067" topLine="34" />
+		</Cursor>
+	</File>
+	<File name="inc\core\CSynchronizable.hpp" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="471" topLine="0" />
+		</Cursor>
 	</File>
 	<File name="inc\os.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="212" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="src\core.cpp" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="inc\core.hpp" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="592" topLine="0" />
+			<Cursor1 position="302" topLine="0" />
+		</Cursor>
+		<Folding>
+			<Collapse line="58" />
+		</Folding>
+	</File>
+	<File name="src\main.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2791" topLine="0" />
+		</Cursor>
+		<Folding>
+			<Collapse line="41" />
+			<Collapse line="48" />
+			<Collapse line="69" />
+			<Collapse line="76" />
+			<Collapse line="83" />
+			<Collapse line="95" />
+			<Collapse line="102" />
+		</Folding>
+	</File>
+	<File name="inc\http\CRequest.hpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1195" topLine="0" />
+		</Cursor>
+		<Folding>
+			<Collapse line="36" />
+			<Collapse line="79" />
+			<Collapse line="184" />
+		</Folding>
+	</File>
+	<File name="inc\core\CEvent.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="352" topLine="0" />
 		</Cursor>
 	</File>
 	<File name="inc\core\CApp.hpp" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -92,231 +227,82 @@
 			<Collapse line="42" />
 		</Folding>
 	</File>
-	<File name="inc\net.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="4855" topLine="101" />
-		</Cursor>
-		<Folding>
-			<Collapse line="118" />
-			<Collapse line="139" />
-			<Collapse line="151" />
-			<Collapse line="156" />
-			<Collapse line="161" />
-			<Collapse line="174" />
-			<Collapse line="178" />
-			<Collapse line="188" />
-		</Folding>
-	</File>
-	<File name="inc\core\CError.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="232" topLine="0" />
-		</Cursor>
-		<Folding>
-			<Collapse line="20" />
-			<Collapse line="25" />
-		</Folding>
-	</File>
-	<File name="inc\watch.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="514" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="inc\log\CLogger.hpp" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2159" topLine="75" />
-		</Cursor>
-		<Folding>
-			<Collapse line="38" />
-			<Collapse line="123" />
-		</Folding>
-	</File>
 	<File name="inc\core\CException.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="453" topLine="3" />
 		</Cursor>
 	</File>
-	<File name="inc\http\CResponse.hpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
+	<File name="inc\net\CSocket.hpp" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="2325" topLine="44" />
+			<Cursor1 position="5172" topLine="111" />
 		</Cursor>
 		<Folding>
-			<Collapse line="30" />
-			<Collapse line="39" />
-			<Collapse line="49" />
-			<Collapse line="55" />
-			<Collapse line="60" />
-			<Collapse line="65" />
-			<Collapse line="70" />
-			<Collapse line="77" />
-			<Collapse line="87" />
-			<Collapse line="101" />
-			<Collapse line="106" />
-			<Collapse line="112" />
-			<Collapse line="126" />
-			<Collapse line="132" />
-			<Collapse line="139" />
-			<Collapse line="210" />
-		</Folding>
-	</File>
-	<File name="inc\log.hpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="285" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="inc\http\CRequest.hpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2664" topLine="32" />
-		</Cursor>
-		<Folding>
-			<Collapse line="45" />
-			<Collapse line="50" />
-			<Collapse line="119" />
-			<Collapse line="130" />
-			<Collapse line="136" />
-			<Collapse line="141" />
-			<Collapse line="146" />
-			<Collapse line="151" />
-			<Collapse line="159" />
-			<Collapse line="167" />
-			<Collapse line="172" />
-			<Collapse line="177" />
-		</Folding>
-	</File>
-	<File name="inc\net\CMessage.hpp" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="139" topLine="0" />
-		</Cursor>
-		<Folding>
-			<Collapse line="8" />
-			<Collapse line="10" />
-			<Collapse line="17" />
-			<Collapse line="22" />
-			<Collapse line="28" />
-			<Collapse line="34" />
-			<Collapse line="39" />
-			<Collapse line="44" />
-			<Collapse line="47" />
-			<Collapse line="54" />
-			<Collapse line="57" />
-			<Collapse line="64" />
-			<Collapse line="69" />
-			<Collapse line="74" />
-			<Collapse line="80" />
-			<Collapse line="86" />
-			<Collapse line="92" />
-			<Collapse line="101" />
-			<Collapse line="109" />
+			<Collapse line="38" />
+			<Collapse line="42" />
+			<Collapse line="189" />
+			<Collapse line="198" />
+			<Collapse line="201" />
+			<Collapse line="207" />
+			<Collapse line="213" />
+			<Collapse line="218" />
+			<Collapse line="230" />
 		</Folding>
 	</File>
 	<File name="inc\net\CServer.hpp" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1351" topLine="0" />
+			<Cursor1 position="951" topLine="1" />
 		</Cursor>
 		<Folding>
-			<Collapse line="14" />
-			<Collapse line="30" />
-			<Collapse line="41" />
-		</Folding>
-	</File>
-	<File name="src\core\CTaskManager.cpp" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1029" topLine="0" />
-		</Cursor>
-		<Folding>
-			<Collapse line="23" />
-			<Collapse line="30" />
-			<Collapse line="39" />
-			<Collapse line="50" />
-			<Collapse line="54" />
-			<Collapse line="73" />
-			<Collapse line="79" />
-		</Folding>
-	</File>
-	<File name="inc\core\CSynchronizable.hpp" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="471" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="inc\net\CSocket.hpp" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="553" topLine="0" />
-		</Cursor>
-		<Folding>
-			<Collapse line="14" />
-			<Collapse line="20" />
-			<Collapse line="31" />
-			<Collapse line="49" />
-			<Collapse line="60" />
-			<Collapse line="66" />
-			<Collapse line="73" />
-			<Collapse line="80" />
-			<Collapse line="87" />
-			<Collapse line="91" />
-			<Collapse line="98" />
-			<Collapse line="102" />
-			<Collapse line="109" />
-			<Collapse line="114" />
-			<Collapse line="120" />
-			<Collapse line="131" />
-		</Folding>
-	</File>
-	<File name="inc\http\CServer.hpp" open="1" top="1" tabpos="3" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="14031" topLine="54" />
-		</Cursor>
-		<Folding>
-			<Collapse line="33" />
+			<Collapse line="21" />
 			<Collapse line="42" />
-			<Collapse line="69" />
-			<Collapse line="75" />
-			<Collapse line="80" />
-			<Collapse line="84" />
-			<Collapse line="92" />
-			<Collapse line="94" />
-			<Collapse line="99" />
+			<Collapse line="45" />
+			<Collapse line="53" />
+			<Collapse line="59" />
+		</Folding>
+	</File>
+	<File name="src\log\CLogger.cpp" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2294" topLine="27" />
+		</Cursor>
+		<Folding>
+			<Collapse line="5" />
+			<Collapse line="11" />
+			<Collapse line="18" />
+			<Collapse line="23" />
+			<Collapse line="29" />
+			<Collapse line="38" />
+			<Collapse line="47" />
+			<Collapse line="52" />
+			<Collapse line="57" />
+			<Collapse line="62" />
+			<Collapse line="90" />
+			<Collapse line="96" />
 			<Collapse line="101" />
-			<Collapse line="111" />
-			<Collapse line="115" />
-			<Collapse line="123" />
-			<Collapse line="133" />
-			<Collapse line="145" />
-			<Collapse line="149" />
-			<Collapse line="153" />
-			<Collapse line="160" />
-			<Collapse line="166" />
-			<Collapse line="190" />
-			<Collapse line="206" />
-			<Collapse line="212" />
-			<Collapse line="216" />
-			<Collapse line="218" />
-			<Collapse line="220" />
-			<Collapse line="229" />
-			<Collapse line="235" />
-			<Collapse line="241" />
-			<Collapse line="245" />
-			<Collapse line="250" />
-			<Collapse line="264" />
-			<Collapse line="266" />
-			<Collapse line="270" />
-			<Collapse line="275" />
-			<Collapse line="286" />
-			<Collapse line="294" />
-			<Collapse line="298" />
-			<Collapse line="321" />
-			<Collapse line="331" />
-			<Collapse line="353" />
-			<Collapse line="356" />
-			<Collapse line="362" />
-			<Collapse line="383" />
-			<Collapse line="389" />
-			<Collapse line="407" />
-			<Collapse line="420" />
-			<Collapse line="427" />
-			<Collapse line="433" />
-			<Collapse line="439" />
-			<Collapse line="446" />
-			<Collapse line="452" />
-			<Collapse line="457" />
+			<Collapse line="107" />
+			<Collapse line="116" />
+			<Collapse line="121" />
+			<Collapse line="126" />
+			<Collapse line="131" />
+			<Collapse line="136" />
+			<Collapse line="157" />
+		</Folding>
+	</File>
+	<File name="inc\http\CRouter.hpp" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="201" topLine="0" />
+		</Cursor>
+		<Folding>
+			<Collapse line="29" />
+			<Collapse line="35" />
+			<Collapse line="41" />
+			<Collapse line="42" />
+			<Collapse line="45" />
+			<Collapse line="51" />
+			<Collapse line="53" />
+			<Collapse line="64" />
+			<Collapse line="71" />
+			<Collapse line="77" />
+			<Collapse line="83" />
 		</Folding>
 	</File>
 </CodeBlocks_layout_file>

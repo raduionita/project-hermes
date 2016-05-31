@@ -37,24 +37,6 @@ namespace net
       // do nothing
 #endif
     }
-  
-    inline CError error() const
-    {
-      static CError error;
-    
-#ifdef _WIN32_WINNT
-      int   code    = ::WSAGetLastError();
-      char* message = ::gai_strerror(code);
-#else // LINUX
-      int   code    = errno;
-      char* message = ::strerror(code);
-#endif // _WIN32_WINNT
-      
-      error.mCode    = code;
-      error.mMessage = message;
-
-      return error;
-    }
   };
   
   class CServer : public AServer // TCP & UDP

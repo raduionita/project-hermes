@@ -3,8 +3,6 @@
 
 #include <core/CEvent.hpp>
 #include <core/CEventEmmiter.hpp>
-#include <core/CSynchronizable.hpp>
-#include <core/CApp.hpp>
 
 #include <log/CLogger.hpp>
 
@@ -18,6 +16,7 @@
 #include <http.hpp>
 #include <http/CRequest.hpp>
 #include <http/CResponse.hpp>
+#include <http/CRequestEvent.hpp>
 
 #include <functional>
 #include <unordered_map>
@@ -30,21 +29,6 @@
 
 namespace http
 {
-  class CRequestEvent : public CEvent
-  {
-    typedef std::shared_ptr<CRequest>  request_t;
-    typedef std::shared_ptr<CResponse> response_t;
-  
-    public:
-    request_t mRequest;
-    
-    public:
-    CRequestEvent(request_t request) : CEvent("request"), mRequest(request)
-    {
-      log::info << "http::CRequestEvent::CRequestEvent(request)" << log::endl;
-    }
-  };
-  
   class CServer : public net::AServer, public CEventEmmiter
   {
     typedef std::shared_ptr<CRequest>        request_t;
@@ -58,15 +42,15 @@ namespace http
     hashmap<socket_t, client_t>  mClients; // @todo Need shared pointers
     
     public:
-    port_t         mPort;    // 80, 8080
-    host_t         mHost;    // NULL, localhost, 127.0.0.1 or sub.domain.tld
-    watch::seconds mTime;    // seconds
-    bool           mRunning;
-    size_t         mBuffering;
+    port_t         mPort;      // 80, 8080
+    host_t         mHost;      // NULL, localhost, 127.0.0.1 or sub.domain.tld
+    watch::seconds mTime;      // seconds
+    bool           mRunning;   // false stops the loop
+    size_t         mBuffering; // 4096
     
     public:
     CServer() 
-    : net::AServer(), mServer(nullptr), mPort(8080), mHost("localhost"), mTime(10), mRunning(false), mBuffering(4096)
+    : net::AServer(), mServer(nullptr), mPort(8080), mTime(10), mRunning(false), mBuffering(4096)
     {
       log::info << "net::CServer::CServer()" << log::endl;
     }
@@ -148,7 +132,7 @@ namespace http
       
       try // listening/server socket
       {
-        mServer = new net::CSocket(net::CSocket::SERVER, mPort, NULL, EProtocol::TCP, EAddressType::IPV4);
+        mServer = new net::CSocket(net::CSocket::SERVER, mPort, mHost, EProtocol::TCP, EAddressType::UNSPEC);
       }
       catch (core::CException& e)
       {
@@ -161,6 +145,19 @@ namespace http
     { 
       log::info << "http::CServer::close()" << log::endl;
       mRunning = false;
+    }
+    
+    CServer& listen(port_t port, std::function<void(void)> callback = core::noop)
+    {
+      mPort = port;
+      return listen(callback);
+    }
+    
+    CServer& listen(port_t port, const host_t& host, std::function<void(void)> callback = core::noop)
+    {
+      mPort = port;
+      mHost = host;
+      return listen(callback);
     }
     
     CServer& listen(std::function<void(void)> callback = core::noop)
@@ -234,6 +231,7 @@ namespace http
               auto it = mClients.find(curfd);
               if(it != mClients.end() && it->second.second != nullptr)
               {
+                request_t&   req = it->second.first;
                 response_t&  res = it->second.second;
                 socket_t   curfd = res->socket();
                 bool         oot = res->time() < now - mTime; // out of time
@@ -256,7 +254,8 @@ namespace http
                   ::close(curfd);
                   mClients.erase(curfd);
                   
-                  // @todo Dont close the socket, just the reqeust/response objects
+                  // @todo Check the request, if Connection: Keep-Alive
+                  //       Dont close the socket, just the reqeust/response objects
                 }
               }
             }
@@ -280,7 +279,7 @@ namespace http
                   FD_SET(newfd, &ifdset);
                   mClients[newfd]; // touch
                   // mClients.insert(std::make_pair(newfd, std::make_pair(nullptr, nullptr)));
-                  //CEventEmmiter::emit(new CConnectionEvent(con));
+                  // CEventEmmiter::emit(new CConnectionEvent(con));
                 }
               }
               else               // incoming data
@@ -297,7 +296,7 @@ namespace http
                   
                   if(result < 0)       // error
                   {
-                    net::CError err = error();
+                    net::CError& err = net::getError();
                     if(err != net::CError::WOULDBLOCK && err != net::CError::AGAIN)
                     {
                       log::error << "> Error receiving data for socket " << curfd << "." << log::endl;
@@ -355,9 +354,9 @@ namespace http
       log::info << "http::CServer::on('" << label << "', callback)" << log::endl;
       
       CEventEmmiter::add(label, [this, callback](const CEvent* e) {
-        const CRequestEvent* re = dynamic_cast<const CRequestEvent*>(e);
-        const request_t&  req = re->mRequest;
-        const response_t& res = mClients[req->socket()].second;
+        const CRequestEvent* re  = dynamic_cast<const CRequestEvent*>(e);
+        const request_t&     req = re->mRequest;
+        const response_t&    res = mClients[req->socket()].second;
         
         synchronized(*res) // prevent threads with same response from overwriting each other
         {
@@ -366,97 +365,6 @@ namespace http
       });
       
       return *this;
-    }
-  };
-
-  class CRouter
-  {
-    typedef std::string                                path_t;
-    typedef std::function<void(CRequest&, CResponse&)> callback_t;
-    typedef std::tuple<EVerb, path_t, callback_t>      route_t;
-    
-    protected:
-    CServer&             mServer;
-    std::vector<route_t> mRoutes;
-    
-    public:
-    CRouter(CServer& server) : mServer(server)
-    {
-      log::info << "http::CRouter::CRouter(server)" << log::endl;
-      init();
-    }
-    
-    ~CRouter()
-    {
-      log::info << "http::CRouter::~CRouter()" << log::endl;
-    }
-    
-    protected:
-    void init()
-    {
-      mServer.on("request", [this](http::CRequest& req, http::CResponse& res) {
-        // go through all mRoutes...see what matches...run its callback
-        for(auto it = mRoutes.begin(); it != mRoutes.end(); ++it) 
-        {
-          EVerb              verb = std::get<0>(*it);
-          const std::string& path = std::get<1>(*it);
-          const callback_t&  call = std::get<2>(*it);
-          
-          log::info << "[" << http::getVerb(verb) << "] [" << req.path()  << "]" << log::endl;
-
-          if(verb == req.verb() || verb == EVerb::ALL) // verb or all
-          {
-            if(path == req.path() || path.size() == 0) // regex or something
-            {
-              call(req, res);
-              break;            // only one route
-            }
-          }
-        }
-      });
-    }
-    
-    public:
-    CRouter& match(EVerb verb, const std::string& path, std::function<void(CRequest&, CResponse&)>&& callback)
-    {
-      // add callback to paths
-      mRoutes.push_back(std::make_tuple(verb, path, callback));
-      return *this;
-    }
-    
-    CRouter& match(EVerb verb, std::function<void(CRequest&, CResponse&)>&& callback)
-    {
-      mRoutes.push_back(std::make_tuple(verb, "", callback));
-      return *this;
-    }
-    
-    CRouter& match(const std::string& path, std::function<void(CRequest&, CResponse&)>&& callback)
-    {
-      mRoutes.push_back(std::make_tuple(EVerb::ALL, path, callback));
-      return *this;
-    }
-    
-    CRouter& match(std::function<void(CRequest&, CResponse&)>&& callback)
-    {
-      mRoutes.push_back(std::make_tuple(EVerb::ALL, "", callback));
-      return *this;
-    }
-  };
-
-  class CApp : public core::CApp
-  {
-    protected:
-    CServer& mServer;
-    
-    public:
-    CApp(CServer& server) : mServer(server)
-    {
-      log::info << "http::CApp::CApp(server)" << log::endl;
-    }
-    
-    void close()
-    {
-      mServer.close();
     }
   };
 }

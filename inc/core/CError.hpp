@@ -3,6 +3,9 @@
 
 #include <core.hpp>
 
+#include <string>
+#include <sstream>
+
 namespace core
 {
   class CError
@@ -38,6 +41,24 @@ namespace core
     }
     
     friend std::iostream& operator <<(std::iostream& out, const CError& error);
+    
+    operator std::string () const
+    {
+      std::stringstream ss;
+      ss << "Error [" << mCode << "] " << mMessage;
+      return ss.str();
+    }
+    
+    public:
+    int getCode() const
+    {
+      return mCode;
+    }
+    
+    std::string& getMessage() 
+    {
+      return mMessage;
+    }
   };
   
   std::iostream& operator <<(std::iostream& out, const CError& error)

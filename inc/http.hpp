@@ -10,29 +10,32 @@ namespace http
 
   enum EVerb
   {
-    GET     = 0x0001, 
-    POST    = 0x0002, 
-    PUT     = 0x0004, 
+    __VERB__ = 0x0000,
+    GET      = 0x0001, 
+    POST     = 0x0002, 
+    PUT      = 0x0004, 
     #undef DELETE
-    DELETE  = 0x0008, 
-    OPTIONS = 0x0010,
-    HEAD    = 0x0020,
-    TRACE   = 0x0040,
-    CONNECT = 0x0080,
-    PATCH   = 0x0100,
-    ALL     = GET | POST | PUT | DELETE | OPTIONS | HEAD | TRACE | CONNECT | PATCH
+    DELETE   = 0x0008, 
+    OPTIONS  = 0x0010,
+    HEAD     = 0x0020,
+    TRACE    = 0x0040,
+    CONNECT  = 0x0080,
+    PATCH    = 0x0100,
+    ALL      = GET | POST | PUT | DELETE | OPTIONS | HEAD | TRACE | CONNECT | PATCH
   };
   
   enum EState
   {
-    IDLE    = 0x01,
-    FLUSH   = 0x02,
-    STARTED = 0x03,
-    DONE    = 0x04
+    __STATE__ = 0x00,
+    IDLE      = 0x01,
+    FLUSH     = 0x02,
+    STARTED   = 0x03,
+    DONE      = 0x04
   };
   
   enum EStatus
   {
+    __STATUS__  = 0,
     OK          = 200,
     NOCONTENT   = 204,
     MOVED       = 301,
@@ -47,29 +50,30 @@ namespace http
   
   enum EType
   {
-    TEXT   = 0x01,  // text/plain
-    HTML   = 0x02,  // text/html
-    JSON   = 0x04,
-    BYTES  = 0x08,
-    STREAM = BYTES,
-    FORM   = 0x10,
-    ICON   = 0x11,  // image/x-icon, image/x-icon
-    PNG    = 0x12,  // image/png
-    JPEG   = 0x13,  // image/jpeg, image/pjpeg
-    GIF    = 0x14,  // image/gif
-    JS     = 0x15,  // application/javascript
-    CSS    = 0x16,  // text/css
-    XML    = 0x17,  // application/xml, text/xml
+    __TYPE__ = 0x00,
+    TEXT     = 0x01,  // text/plain
+    HTML     = 0x02,  // text/html
+    JSON     = 0x04,
+    BYTES    = 0x08,
+    STREAM   = BYTES,
+    FORM     = 0x10,
+    ICON     = 0x11,  // image/x-icon, image/x-icon
+    PNG      = 0x12,  // image/png
+    JPEG     = 0x13,  // image/jpeg, image/pjpeg
+    GIF      = 0x14,  // image/gif
+    JS       = 0x15,  // application/javascript
+    CSS      = 0x16,  // text/css
+    XML      = 0x17,  // application/xml, text/xml
     
-    MP3    = 0x18,  // audio/mpeg3, audio/x-mpeg-3
-    MP4    = 0x19,  // video/mp4, video/mpeg
-    OGG    = 0x20,  // audio/ogg
-    OGV    = 0x21,  // video/ogg
+    MP3      = 0x18,  // audio/mpeg3, audio/x-mpeg-3
+    MP4      = 0x19,  // video/mp4, video/mpeg
+    OGG      = 0x20,  // audio/ogg
+    OGV      = 0x21,  // video/ogg
   };
   
   enum EHead // @todo Needs change to enum class
   {
-    NONE           = 0x00, 
+    __HEAD__       = 0x00, 
     ACCEPT         = 0x01, // Accept: text/plain
     CHARSET        = 0x02, // Accept-Charset: utf-8
     ENCODING       = 0x03, // Accept-Encoding: gzip OR deflate
@@ -102,6 +106,12 @@ namespace http
     CSRF           = 0x60  // X-Csrf-Token: i8XNjC4b8KVok4uw5RftR38Wgp2BFwql
   };
 
+  inline constexpr bool operator == (int i, EVerb a) { return i == static_cast<int>(a); }
+  inline constexpr bool operator == (int i, EState a) { return i == static_cast<int>(a); }
+  inline constexpr bool operator == (int i, EStatus a) { return i == static_cast<int>(a); }
+  inline constexpr bool operator == (int i, EType a) { return i == static_cast<int>(a); }
+  inline constexpr bool operator == (int i, EHead a) { return i == static_cast<int>(a); }
+  
   inline std::string getType(EType type)
   {
     switch(type)

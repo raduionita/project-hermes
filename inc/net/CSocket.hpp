@@ -1,8 +1,9 @@
 #ifndef __net_csocket_hpp__
 #define __net_csocket_hpp__
 
-#include <net.hpp>
 #include <core/CException.hpp>
+#include <net.hpp>
+#include <net/CError.hpp>
 
 namespace net
 {
@@ -56,7 +57,7 @@ namespace net
      * @param EAddressType   addresstype EAddressType::IPV4 or EAddressType::IPV6
      * @param int            limit       =2147483647 | max allowed connections
      */
-    CSocket(EType type, port_t port, const char* host, EProtocol protocol = EProtocol::TCP, EAddressType addresstype = EAddressType::UNSPEC, int limit = SOMAXCONN)
+    CSocket(EType type, port_t port, const host_t& host, EProtocol protocol = EProtocol::TCP, EAddressType addresstype = EAddressType::UNSPEC, int limit = SOMAXCONN)
     : mSocket(INVALID_SOCKET)
     {
       log::info << "net::CSocket::CSocket(type, port, host, protocol, addresstype, limit)" << log::endl;
@@ -81,7 +82,6 @@ namespace net
     {
       log::info << "net::CSocket::~CSocket()" << log::endl;
       //close();
-      
     }
     
     CSocket& operator =(const CSocket& that)
@@ -133,12 +133,14 @@ namespace net
       return mSocket != INVALID_SOCKET;
     }
     
-    static socket_t build(EType type, port_t port, const char* host, EProtocol protocol = EProtocol::TCP, EAddressType addresstype = EAddressType::UNSPEC, int limit = SOMAXCONN)
+    static socket_t build(EType type, port_t port, const host_t& host, EProtocol protocol = EProtocol::TCP, EAddressType addresstype = EAddressType::UNSPEC, int limit = SOMAXCONN)
     {
       log::info << "net::CSocket::build(type, port, host, protocol, addresstype, limit)" << log::endl;
       
       socket_t   sock = INVALID_SOCKET;
       ulong      temp = 1;
+      int        yes  = 1;
+      int        no   = 0;
       status_t   status;
       addrinfo_t hints,
                * srvinfo = NULL,
@@ -147,29 +149,29 @@ namespace net
       hints.ai_family   = static_cast<int>(addresstype);                          // UNSPEC
       hints.ai_socktype = static_cast<int>(protocol == EProtocol::TCP ? ESocketType::TCP : ESocketType::UDP);
       hints.ai_flags    = type == EType::SERVER ? AI_PASSIVE : 0;                 // server
-      hints.ai_protocol = type == EType::CLIENT ? static_cast<int>(protocol) : 0; // client
+      hints.ai_protocol = static_cast<int>(protocol); // type == EType::CLIENT ? static_cast<int>(protocol) : 0; // client
       
       // use hints to get an address
       // NULL => 0.0.0.0 => bind to every ip on this machine
-      status = ::getaddrinfo(host, std::to_string((uint)port).c_str(), &hints, &srvinfo);
+      status = ::getaddrinfo(host.size() == 0 ? NULL : host.c_str(), std::to_string((uint)port).c_str(), &hints, &srvinfo);
       if(status != STATUS_OK)
       {
-        throw CException(::gai_strerror(WSAGetLastError()), __FILE__, __LINE__);
+        throw CException(net::getError(), __FILE__, __LINE__);
       }
 
       // find and bind/connect to an address
       for(ptr = srvinfo; ptr != NULL; ptr = ptr->ai_next)
       {
-        //          socket(EAddressType,   ESocketType,      EProtocol);
+        //          socket(EAddressType,   ESocketType,      EProtocol); 
         sock = ::socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
         if(sock == INVALID_SOCKET)
         {
           log::error << "> Error socket " << sock << ":" << gai_strerror(WSAGetLastError()) << "." << log::endl;
           continue;
         }
-
-        // prevent "address in use" error
-        ::setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, "1", sizeof(int));
+        
+        ::setsockopt(sock, SOL_SOCKET,   SO_REUSEADDR, (char*)(&yes), sizeof(int));  // prevent "address in use" error
+        ::setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY,  (char*)(&no),  sizeof(int));  // disable ipv6 only
         
         // non-blocking
 #ifdef _WIN32_WINNT
@@ -210,12 +212,12 @@ namespace net
             }
             else
             {
-              log::error << "> Error getnameinfo(). " << gai_strerror(WSAGetLastError()) << log::endl;
+              log::error << "> Error getnameinfo. " << ::gai_strerror(::WSAGetLastError()) << log::endl;
             }
           }
           else // SOCKET_ERROR
           {
-            log::error << "> Error bind: " << gai_strerror(WSAGetLastError()) << "." << log::endl;
+            log::error << "> Error bind: " << ::gai_strerror(::WSAGetLastError()) << "." << log::endl;
             ::close(sock);
             sock = INVALID_SOCKET;
             continue;

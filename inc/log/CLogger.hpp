@@ -70,7 +70,9 @@ namespace log
     YELLOW, 
     WHITE
   };
-
+  
+  bool __needs_cr__ = false;
+  
   class CLogger;
 
   class CLoggerStrategy
@@ -78,20 +80,49 @@ namespace log
     friend class CLogger;
   
     public:
-    CLoggerStrategy();
-    virtual ~CLoggerStrategy();
+    CLoggerStrategy()
+    {
+      //CLogger& log = CLogger::getInstance();
+      //log << *this;
+    }
+    
+    virtual ~CLoggerStrategy()
+    {
+      
+    }
   
     public:
     virtual void log(const std::string& message) = 0;
   };
   
-  extern void flush(CLoggerStrategy& strategy, const std::string& output);
+  void flush(CLoggerStrategy& strategy, const std::string& output)
+  {
+    strategy.log(output);
+  }
   
-  extern void endl(CLoggerStrategy& strategy, const std::string& output);
+  void endl(CLoggerStrategy& strategy, const std::string& output)
+  {
+    log::flush(strategy, (__needs_cr__ ? "\r" + output + "\n" : output + "\n"));
+    __needs_cr__ = false;
+  }
   
-  extern void spinner(CLoggerStrategy& strategy);
+  void spinner(CLoggerStrategy& strategy)
+  {
+    static unsigned int i = 0;
+    i = i % (1024 * 4);
+    strategy.log(i < (1024 * 1) ? "\r-" : (i < (1024 * 2) ? "\r\\" : (i < (1024 * 3) ? "\r|" : "\r/")));
+    ++i;
+    __needs_cr__ = true;
+  }
   
-  extern void loading(CLoggerStrategy& strategy);
+  void loading(CLoggerStrategy& strategy)
+  {
+    static unsigned int j = 0;
+    j = j % (1024 * 4);
+    strategy.log(j == (1024 * 0) ? "." : (j == (1024 * 1) ? "\r.." : (j == (1024 * 2) ? "\r\r..." : (j == (1024 * 3) ? "\r\r\r" : ""))));
+    ++j;
+    __needs_cr__ = true;
+  }
   
   template <typename Rep, typename Period>
   std::basic_ostream<char>& operator <<(std::basic_ostream<char>& out, const std::chrono::duration<Rep, Period>& in)
@@ -111,13 +142,59 @@ namespace log
     ELevel            mType;
     
     public:
-    CLogger();
-    CLogger(CLoggerStrategy* pStrategy);
-    virtual ~CLogger();
+    CLogger() : mStrategy(nullptr), mType(ELevel::INFO)
+    {
+      
+    }
     
-    CLogger& operator <<(const ELevel& type);
-    CLogger& operator <<(manipulator_t manipulator);
-    CLogger& operator <<(special_t special);
+    CLogger(CLoggerStrategy* pStrategy)
+    {
+      mStrategy = pStrategy;
+    }
+  
+    virtual ~CLogger()
+    {
+      *this << log::flush;
+    }
+    
+    CLogger& operator <<(const ELevel& type)
+    {
+      mType = type;
+      return *this;
+    }
+
+    CLogger& operator <<(manipulator_t manipulator)
+    {
+      size_t len = mOutput.tellp();
+      
+      if(len > 0 && LOGGING)
+      {
+        std::string level;
+        switch(mType)
+        {
+          default:
+          case ELevel::INFO:  level = " [INFO] ";  break;
+        //case ELevel::DEBUG: level = " [DEBUG] "; break;
+          case ELevel::WARN:  level = " [WARN] ";  break;
+          case ELevel::FATAL: level = " [FATAL] "; break;
+        };
+
+        manipulator(*mStrategy, watch::timestamp() + level + mOutput.str());
+      }
+      mOutput.str(std::string(""));
+      return *this;
+    }
+    
+    CLogger& operator <<(special_t special)
+    {
+      special(*mStrategy);
+      return *this;
+    }
+    
+    CLogger& operator <<(EColor color)
+    {
+      return *this;
+    }
     
     template <typename T>
     CLogger& operator <<(const T& output)
@@ -128,13 +205,15 @@ namespace log
       return *this;
     }
     
-    CLogger& operator <<(EColor color);
-    
     template <typename T>
     friend CLogger& operator <<(const ELevel&, const T&);
   
     public:
-    CLogger& setStrategy(CLoggerStrategy* pStrategy);
+    CLogger& setStrategy(CLoggerStrategy* pStrategy)
+    {
+      mStrategy = pStrategy;
+      return *this;
+    }
   };
 
   class CFileLoggerStrategy : public CLoggerStrategy
@@ -145,12 +224,30 @@ namespace log
     std::fstream mFStream;
     
     public:
-    CFileLoggerStrategy(const std::string& file);
-    ~CFileLoggerStrategy();
+    CFileLoggerStrategy(const std::string& file) : CLoggerStrategy()
+    {
+      //mFStream.open(file.getFilePath().c_str(), std::ios::binary | std::ios::out | std::ios::trunc);
+      mFStream.open(file.c_str(), std::ios::binary | std::ios::out | std::ios::trunc);
+      if(!mFStream.is_open())
+        throw core::CException("Failed to open/create log file");
+        //throw EXCEPTION << "Failed to open/create log file: " << file.getFilePath();
+    }
+    
+    ~CFileLoggerStrategy()
+    {
+      mFStream.close();
+    }
     
     public:
-    void log(const char output);
-    void log(const std::string& output);
+    void log(const std::string& output)
+    {
+      mFStream.write(output.c_str(), output.size());
+    }
+
+    void log(const char output)
+    {
+      mFStream.write(&output, 1);
+    }
   };
   
   class CCoutLoggerStrategy : public CLoggerStrategy
@@ -158,23 +255,33 @@ namespace log
     friend class CLogger;
     
     public:
-    CCoutLoggerStrategy();
+    CCoutLoggerStrategy() : CLoggerStrategy()
+    {
+      std::cout.sync_with_stdio(true);
+    }
     
     public:
-    void log(const char output);
-    void log(const std::string& output);
+    void log(const char output)
+    {
+      std::cout << output;
+    }
+    
+    void log(const std::string& output)
+    {
+      std::cout << output;
+    }
   };
 
-  extern CCoutLoggerStrategy cout;
-  extern CLogger             log;
-  extern const char          tab;
-  extern const char          cr;
-  extern const char          nl;
+  CCoutLoggerStrategy cout;
+  CLogger             log(&cout);
+  const char          tab('\t');
+  const char          cr('\r');
+  const char          nl('\n');
 
-  extern ELevel info;
-  extern ELevel debug;
-  extern ELevel warn;
-  extern ELevel error;
+  ELevel info  = ELevel::INFO;
+  ELevel debug = ELevel::DEBUG;
+  ELevel warn  = ELevel::WARN;
+  ELevel error = ELevel::FATAL;
   
   template <typename T>
   CLogger& operator << (ELevel& type, T const& output)
@@ -183,8 +290,12 @@ namespace log
     log << output;
     return log;
   }
-  
-  extern CLoggerStrategy& operator >> (CLoggerStrategy& oStrategy, CLogger& oLog);
+
+  CLoggerStrategy& operator >> (CLoggerStrategy& oStrategy, CLogger& oLog)
+  {
+    oLog.setStrategy(&oStrategy);
+    return oStrategy;
+  }
 }
 
 #endif // __log_clogger_hpp__

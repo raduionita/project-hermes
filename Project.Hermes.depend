@@ -1,33 +1,35 @@
 # depslib dependency file v1.0
-1464269520 source:c:\workspace\cpp\project.hermes\src\main.cpp
+1464709910 source:c:\workspace\cpp\project.hermes\src\main.cpp
 	<http/CServer.hpp>
-	<os.hpp>
-	<watch.hpp>
-	<thread>
+	<http/CRouter.hpp>
+	<http/CApp.hpp>
+	<http/CFileSystem.hpp>
 	<sstream>
+	<fstream>
 
-1464271932 c:\workspace\cpp\project.hermes\inc\http.hpp
+1464709497 c:\workspace\cpp\project.hermes\inc\http.hpp
 	<unordered_map>
 
-1464252405 c:\workspace\cpp\project.hermes\inc\core.hpp
+1464695003 c:\workspace\cpp\project.hermes\inc\core.hpp
 	<string>
 
-1463747421 c:\workspace\cpp\project.hermes\inc\net.hpp
+1464600156 c:\workspace\cpp\project.hermes\inc\net.hpp
 	<ws2tcpip.h>
 	<errno.h>
 	<core.hpp>
 	<cstddef>
 	<cstdio>
 
-1463748645 c:\workspace\cpp\project.hermes\inc\net\cserver.hpp
+1464600122 c:\workspace\cpp\project.hermes\inc\net\cserver.hpp
 	<net.hpp>
 	<net/CSocket.hpp>
 	<net/CError.hpp>
 	<core/CException.hpp>
 
-1463755256 c:\workspace\cpp\project.hermes\inc\net\csocket.hpp
-	<net.hpp>
+1464620426 c:\workspace\cpp\project.hermes\inc\net\csocket.hpp
 	<core/CException.hpp>
+	<net.hpp>
+	<net/CError.hpp>
 
 1462286414 c:\workspace\cpp\project.hermes\inc\core\cexception.hpp
 	<exception>
@@ -52,7 +54,7 @@
 	<net.hpp>
 	<string>
 
-1463130870 c:\workspace\cpp\project.hermes\inc\core\ctaskmanager.hpp
+1464700112 c:\workspace\cpp\project.hermes\inc\core\ctaskmanager.hpp
 	<core.hpp>
 	<core/TSingleton.hpp>
 	<log/CLogger.hpp>
@@ -81,7 +83,7 @@
 	<mutex>
 	<log.hpp>
 
-1463667634 c:\workspace\cpp\project.hermes\inc\log\clogger.hpp
+1464701215 c:\workspace\cpp\project.hermes\inc\log\clogger.hpp
 	<core/CException.hpp>
 	<watch.hpp>
 	<vector>
@@ -116,14 +118,16 @@
 1463487867 source:c:\workspace\cpp\project.hermes\src\watch.cpp
 	<watch.hpp>
 
-1463741888 c:\workspace\cpp\project.hermes\inc\net\cerror.hpp
+1464600328 c:\workspace\cpp\project.hermes\inc\net\cerror.hpp
 	<net.hpp>
 	<core/CError.hpp>
 
-1463742004 c:\workspace\cpp\project.hermes\inc\core\cerror.hpp
+1464601168 c:\workspace\cpp\project.hermes\inc\core\cerror.hpp
 	<core.hpp>
+	<string>
+	<sstream>
 
-1464254303 c:\workspace\cpp\project.hermes\inc\http\crequest.hpp
+1464683655 c:\workspace\cpp\project.hermes\inc\http\crequest.hpp
 	<net.hpp>
 	<http.hpp>
 	<watch.hpp>
@@ -132,11 +136,9 @@
 	<cstdio>
 	<map>
 
-1464271878 c:\workspace\cpp\project.hermes\inc\http\cserver.hpp
+1464708082 c:\workspace\cpp\project.hermes\inc\http\cserver.hpp
 	<core/CEvent.hpp>
 	<core/CEventEmmiter.hpp>
-	<core/CSynchronizable.hpp>
-	<core/CApp.hpp>
 	<log/CLogger.hpp>
 	<net/CServer.hpp>
 	<net/CSocket.hpp>
@@ -146,6 +148,7 @@
 	<http.hpp>
 	<http/CRequest.hpp>
 	<http/CResponse.hpp>
+	<http/CRequestEvent.hpp>
 	<functional>
 	<unordered_map>
 	<tuple>
@@ -153,11 +156,41 @@
 	<string>
 	<memory>
 
-1464271869 c:\workspace\cpp\project.hermes\inc\http\cresponse.hpp
+1464683500 c:\workspace\cpp\project.hermes\inc\http\cresponse.hpp
 	<watch.hpp>
 	<http.hpp>
 	<core/CSynchronizable.hpp>
 	<log/CLogger.hpp>
 	<string>
-	<map>
+
+1464684445 c:\workspace\cpp\project.hermes\inc\http\crequestevent.hpp
+	<http.hpp>
+	<http/CRequest.hpp>
+	<core/CEvent.hpp>
+	<memory>
+
+1464687763 c:\workspace\cpp\project.hermes\inc\http\crouter.hpp
+	<http.hpp>
+	<http/CServer.hpp>
+	<http/CRequest.hpp>
+	<http/CResponse.hpp>
+	<log/CLogger.hpp>
+	<string>
+	<vector>
+	<functional>
+	<tuple>
+
+1464709894 c:\workspace\cpp\project.hermes\inc\http\capp.hpp
+	<http.hpp>
+	<core/CApp.hpp>
+	<http/CServer.hpp>
+	<http/AMiddleware.hpp>
+
+1464709837 c:\workspace\cpp\project.hermes\inc\http\amiddleware.hpp
+	<http/CServer.hpp>
+
+1464710092 c:\workspace\cpp\project.hermes\inc\http\cfilesystem.hpp
+	<http.hpp>
+	<http/AMiddleware.hpp>
+	<http/CServer.hpp>
 

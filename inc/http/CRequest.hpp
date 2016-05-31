@@ -28,7 +28,7 @@ namespace http
     std::string               mPath;
     hashmap<param_t, value_t> mParams;
     hashmap<param_t, value_t> mQuery;
-    hashmap<int,   value_t>   mHead;
+    hashmap<int,     value_t> mHead;
     std::string               mBody;
     
     public:
@@ -71,7 +71,9 @@ namespace http
             mVerb = EVerb::CONNECT;
           else if(strcmp(v, "PATCH") == 0)
             mVerb = EVerb::PATCH;
-            
+          
+          // @todo Add remaining VERBS/METHODS
+          
           mPath = p;
         }
         else             // headers
@@ -81,7 +83,7 @@ namespace http
           core::tolower(key);
           value_t val(line.substr(pos+2)); // remove first emptry char
           
-          int head = 0;
+          EHead head = EHead::__HEAD__;
           
           if(key == "accept")
             head = EHead::ACCEPT;
@@ -98,7 +100,7 @@ namespace http
           
           
           
-          
+          // @todo Add missing headers
           
           
           
@@ -112,7 +114,12 @@ namespace http
         }
       }
       
+      
+      
       // @todo Handle body...
+      
+      
+      
     }
     
     CRequest(CRequest&& that) 

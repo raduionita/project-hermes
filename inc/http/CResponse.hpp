@@ -8,7 +8,6 @@
 #include <log/CLogger.hpp>
 
 #include <string>
-#include <map>
 
 namespace http
 {
@@ -23,7 +22,7 @@ namespace http
     
     uint                        mStatus;
     hashmap<int, std::string>   mHead;    // should be EHead, string
-    std::string                 mBody;
+    std::string                 mBody;    // this should be a CBuffer<char>
     
     public:
     CResponse(socket_t sock) 
@@ -70,7 +69,7 @@ namespace http
     CResponse& status(EStatus val)
     {
       mStatus = val;
-      mHead[EHead::STATUS] = (int)(val);
+      head(EHead::STATUS, std::to_string(static_cast<int>(val)));
       return *this;
     }
     
@@ -122,7 +121,12 @@ namespace http
       }
       return *this;
     }
-
+    
+    //CResponse& send(const core::CFile& file)
+    //{
+    //  // @todo send ... file
+    //}
+    
     CResponse& end(const std::string& data)
     {
       send(data);
