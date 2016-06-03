@@ -122,9 +122,19 @@ namespace http
       return *this;
     }
     
+    // @todo Add File send feature
     //CResponse& send(const core::CFile& file)
     //{
     //  // @todo send ... file
+    //}
+    
+    // @todo Add Stream send feature
+    //CResponse& send(const core::CStream& stream)
+    //{
+    //  mState = IDLE;
+    //  while(!stream.is(done))
+    //    mBody.append(stream.read()) // pop from the front of the stream(fifo) 
+    //    mState = FLUSH;
     //}
     
     CResponse& end(const std::string& data)

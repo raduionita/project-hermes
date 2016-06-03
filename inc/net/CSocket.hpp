@@ -121,7 +121,7 @@ namespace net
     {
       log::info << "net::CSocket::close()" << log::endl;
       // OR ::close()
-      ::close(mSocket);
+      ::closesocket(mSocket);
       if(mSocket == CSocket::INVALID)
         log::info << "> Closing socket " << "INVALID" << "." << log::endl;
       else
@@ -189,7 +189,7 @@ namespace net
           if(status == SOCKET_ERROR)
           {
             log::error << "> Error connect: " << gai_strerror(WSAGetLastError()) << "." << log::endl;
-            ::close(sock);
+            ::closesocket(sock);
             sock = INVALID_SOCKET;
             continue;
           }
@@ -218,7 +218,7 @@ namespace net
           else // SOCKET_ERROR
           {
             log::error << "> Error bind: " << ::gai_strerror(::WSAGetLastError()) << "." << log::endl;
-            ::close(sock);
+            ::closesocket(sock);
             sock = INVALID_SOCKET;
             continue;
           }

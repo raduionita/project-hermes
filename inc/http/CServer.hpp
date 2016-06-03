@@ -29,6 +29,8 @@
 
 namespace http
 {
+  using namespace core;
+
   class CServer : public net::AServer, public CEventEmmiter
   {
     typedef std::shared_ptr<CRequest>        request_t;
@@ -77,7 +79,7 @@ namespace http
         {
           if(it->second.first == nullptr || it->second.second == nullptr)
           {
-            ::close(it->first);
+            ::closesocket(it->first);
             mClients.erase(it++);
           }
           else
@@ -88,7 +90,7 @@ namespace http
             
               // /* CResponse* */     delete it->second.second; it->second.second = nullptr;
               // /* CRequest* */      delete it->second.first;  it->second.first  = nullptr;
-              ::close(it->first);
+              ::closesocket(it->first);
               
               mClients.erase(it++);
             }
@@ -147,7 +149,7 @@ namespace http
       mRunning = false;
     }
     
-    CServer& listen(port_t port, std::function<void(void)> callback = core::noop)
+    CServer& listen(port_t port, std::function<void(void)> callback = noop)
     {
       mPort = port;
       return listen(callback);
@@ -236,6 +238,8 @@ namespace http
                 socket_t   curfd = res->socket();
                 bool         oot = res->time() < now - mTime; // out of time
                 
+                // @todo Add send/flush when buffer is full
+                
                 if(oot || res->mState == EState::DONE)
                 {
                   std::string msg = res->read();
@@ -251,8 +255,11 @@ namespace http
                   }
                   
                   FD_CLR(curfd, &ifdset);
-                  ::close(curfd);
+                  ::closesocket(curfd);
                   mClients.erase(curfd);
+                  
+                  // @todo What if another thread(event action) needs this 
+                  //       Maybe this should be marked for delete, but not just yet...only after everyone is done
                   
                   // @todo Check the request, if Connection: Keep-Alive
                   //       Dont close the socket, just the reqeust/response objects
@@ -303,7 +310,7 @@ namespace http
                       log::error << err << log::endl;
                       log::warn << "> Closing connection on socket " << curfd << "." << log::endl;
                       FD_CLR(curfd, &ifdset);
-                      ::close(curfd);
+                      ::closesocket(curfd);
                       mClients.erase(curfd);
 
                       // @todo remove client from mClients
@@ -321,7 +328,7 @@ namespace http
                   {
                     log::warn << "> Closing connection on socket " << curfd << "." << log::endl;
                     FD_CLR(curfd, &ifdset);
-                    ::close(curfd);
+                    ::closesocket(curfd);
                     mClients.erase(curfd);
                     // @todo remove client from mClients
                     // @todo emit -> new CCloseEvent()

@@ -167,9 +167,9 @@ namespace net
 using namespace net;
 
 #ifdef _WIN32_WINNT
-  __stdcall int(*close)(SOCKET) = &closesocket;
+  //__stdcall int(*close)(SOCKET) = &closesocket;
 #else // LINUX
-  // already has a ::close()
+  __stdcall int(*closesocket)(SOCKET) = &close;
 #endif // _WIN32_WINNT
 
 /**

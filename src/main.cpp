@@ -6,20 +6,29 @@
 #include <sstream>
 #include <fstream>
 
+#include <dirent.h>
+#include <sys/stat.h>
+
 int main(int argc, char** argv)
 {
-  log::info << "::main(argc, argv)" << log::endl;
-  
-  // http::CServer     srv;
-  // http::CApp        app(srv);
-  // http::CFileSystem filesystem;
-  // app.use(filesystem);
-  // app.match(http::GET, "/path", [](http::CRequest& req, http::CResponse& res) { });
-  // srv.on("close", ...);
+  log::info << "::main(argc, argv)" << log::endl;  
   
   http::CServer     server;          // http::server()
   http::CRouter     router(server);  // http::route(server)
   http::CApp        app(server);     // for handling system events
+    
+  // http::CServer      srv;
+  // http::CApp         app(srv);
+  http::CFileSystem  filesystem("public");
+  // http::CCaching     cache;
+  // http::CTplRenderer tpl("views");
+  // os::CFileIO        fio;
+  
+  // app.use(cache);
+  app.use(filesystem);
+  // app.match(http::GET, "/path", [](http::CRequest& req, http::CResponse& res) { });
+  // tpl.render("path/to/file.tpl", data);
+  // srv.on("close", ...);
   
   router.match(http::GET, "/favicon.ico", [](http::CRequest& req, http::CResponse& res) {
     log::info << "> " << req.head(http::HOST) << " /favicon.ico" << log::endl;
@@ -46,32 +55,14 @@ int main(int argc, char** argv)
     
     res.end();
   });  
-  router.match(http::GET, "/css/styles.css", [](http::CRequest& req, http::CResponse& res) {
-    log::info << "> " << req.head(http::HOST) << " /css/styles.css" << log::endl;
+  router.match(http::GET, "/products/:id", [](http::CRequest& req, http::CResponse& res) {
+    log::info << "> " << req.head(http::HOST) << " " << req.path() << log::endl;
     
-    res.type(http::CSS);
-    
-    std::ifstream ifs("css/styles.css", std::ios::binary | std::ios::in);
-    if(ifs) 
-    {
-      std::stringstream ss;
-      ss << ifs.rdbuf();
-      res.status(http::OK);
-      res.send(ss.str());
-    }
-    else
-    {
-      res.status(http::NOTFOUND);
-      log::warn << "> Cannot open file!" << log::endl;
-    }
-    
-    res.end();
   });
   router.match(http::GET, [](http::CRequest& req, http::CResponse& res) {
     log::info << "> " << req.head(http::HOST) << " " << req.path()  << log::endl;
     
     res.type(http::HTML);
-    
     std::ifstream ifs("index.html", std::ios::binary | std::ios::in);
     if(ifs) 
     {
@@ -88,10 +79,8 @@ int main(int argc, char** argv)
     
     res.end();
     
-    //res.send(file::read("relative/path/to/file", file::UTF8));
-    //res.send(tpl::render("relative/path/to/template", data));
-    
-    res.end();
+    //res.send(fio.read("relative/path/to/file", file::UTF8));
+    //res.send(tpl.render("relative/path/to/template.tpl", data));
   });
   server.listen([]() {
     log::info << "> Listening." << log::endl;
