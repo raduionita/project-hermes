@@ -84,7 +84,7 @@ namespace http
           }
           else
           {
-            if(it->second.second->is(EState::DONE))       // ready for erase
+            if(it->second.second->is(EState::FLUSH) || it->second.second->is(EState::DONE)) // ready for erase: FLUSH or DONE
             {
               log::info << "> Removing client... " << log::endl;
             
@@ -102,7 +102,7 @@ namespace http
               {
                 log::info << "> Ending client..." << log::endl;
                 
-                it->second.second->end();
+                it->second.second->set(EState::DONE);
                 
                 // @todo Try to send the response before closing
               }
@@ -233,14 +233,14 @@ namespace http
               auto it = mClients.find(curfd);
               if(it != mClients.end() && it->second.second != nullptr)
               {
-                request_t&   req = it->second.first;
+                //request_t&   req = it->second.first;
                 response_t&  res = it->second.second;
                 socket_t   curfd = res->socket();
                 bool         oot = res->time() < now - mTime; // out of time
                 
                 // @todo Add send/flush when buffer is full
                 
-                if(oot || res->mState == EState::DONE)
+                if(oot || res->is(EState::FLUSH))
                 {
                   std::string msg = res->read();
                   result = ::send(curfd, msg.c_str(), msg.size(), 0); // tcp::send() -> send all
@@ -249,20 +249,23 @@ namespace http
                     log::error << "> Error sending data for socket " << curfd << "." << log::endl;
                     log::error << ::gai_strerror(::WSAGetLastError()) << log::endl;
                   }
-                  else 
+                  else
                   {
                     log::info << "> Response sent on socket " << curfd << "." << log::endl;
                   }
                   
-                  FD_CLR(curfd, &ifdset);
-                  ::closesocket(curfd);
-                  mClients.erase(curfd);
+                  res->set(EState::DONE);
                   
                   // @todo What if another thread(event action) needs this 
                   //       Maybe this should be marked for delete, but not just yet...only after everyone is done
                   
                   // @todo Check the request, if Connection: Keep-Alive
                   //       Dont close the socket, just the reqeust/response objects
+                  
+                  //FD_CLR(curfd, &ifdset);
+                  //::closesocket(curfd);
+                  mClients.erase(curfd); // remove old req & res
+                  mClients[curfd]; // touch
                 }
               }
             }
@@ -280,6 +283,8 @@ namespace http
                 }
                 else
                 {
+                  log::info << "> New connection on socket " << newfd << log::endl;
+                  
                   minfd = std::min(newfd, minfd);
                   maxfd = std::max(newfd, maxfd);
                   
@@ -340,6 +345,7 @@ namespace http
                     msg.append(chunk);
                     if(result < length || result > length)
                     {
+                      log::info << log::nl << log::nl << msg << log::nl << log::endl;
                       break;
                     }
                   }
@@ -350,7 +356,7 @@ namespace http
               }
             }
           }
-        }
+        } 
       }
       
       return *this;
@@ -363,11 +369,16 @@ namespace http
       CEventEmmiter::add(label, [this, callback](const CEvent* e) {
         const CRequestEvent* re  = dynamic_cast<const CRequestEvent*>(e);
         const request_t&     req = re->mRequest;
-        const response_t&    res = mClients[req->socket()].second;
-        
-        synchronized(*res) // prevent threads with same response from overwriting each other
+        if(req)
         {
-          callback(*req, *res);
+          const response_t&  res = mClients[req->socket()].second;
+          if(res && !res->is(EState::DONE) && !res->is(EState::FLUSH))
+          {
+            synchronized(*res) // prevent threads with same response from overwriting each other
+            {
+              callback(*req, *res);
+            }
+          }
         }
       });
       

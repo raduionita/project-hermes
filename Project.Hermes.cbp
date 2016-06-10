@@ -49,6 +49,7 @@
 		<Unit filename="inc/http/AMiddleware.hpp" />
 		<Unit filename="inc/http/CApp.hpp" />
 		<Unit filename="inc/http/CFileSystem.hpp" />
+		<Unit filename="inc/http/CHeader.hpp" />
 		<Unit filename="inc/http/CRequest.hpp" />
 		<Unit filename="inc/http/CRequestEvent.hpp" />
 		<Unit filename="inc/http/CResponse.hpp" />

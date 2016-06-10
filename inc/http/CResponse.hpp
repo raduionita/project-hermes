@@ -29,7 +29,7 @@ namespace http
     : mSocket(sock), mTime(watch::millitime())
     {
       log::info << "http::CResponse::CResponse(sock)" << log::endl;
-      mStatus            = http::OK;
+      mStatus            = http::NOTFOUND;
       mState             = EState::IDLE;
       mHead[EHead::TYPE] = "text/plain";
     }
@@ -61,9 +61,10 @@ namespace http
       return mState == state;
     }
     
-    EState state() const
+    CResponse& set(EState state)
     {
-      return mState;
+      mState = state;
+      return *this;
     }
     
     CResponse& status(EStatus val)
@@ -110,14 +111,14 @@ namespace http
     
     CResponse& send(const std::string& data)
     {
-      if(mState == EState::DONE)
+      if(mState & EState::FLUSH)
       {
         log::warn << "> Writing after the response was marked as ended is useless!" << log::endl;
       }
       else
       {
         mBody.append(data);
-        mState = mState == EState::IDLE ? EState::STARTED : mState; // change only if lower
+        mState = mState == EState::IDLE ? EState::START : mState; // change only if lower
       }
       return *this;
     }
@@ -145,7 +146,7 @@ namespace http
     
     CResponse& end()
     {
-      mState = EState::DONE;
+      mState = EState::FLUSH;
       return *this;
     }
     

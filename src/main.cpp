@@ -13,57 +13,28 @@ int main(int argc, char** argv)
 {
   log::info << "::main(argc, argv)" << log::endl;  
   
-  http::CServer     server;          // http::server()
-  http::CRouter     router(server);  // http::route(server)
-  http::CApp        app(server);     // for handling system events
-    
-  // http::CServer      srv;
-  // http::CApp         app(srv);
+  http::CServer      srv;          // http::server()
+  http::CApp         app(srv);     // for handling system events
   http::CFileSystem  filesystem("public");
-  // http::CCaching     cache;
+  // http::CCaching     cache("cache");
   // http::CTplRenderer tpl("views");
   // os::CFileIO        fio;
   
-  // app.use(cache);
   app.use(filesystem);
-  // app.match(http::GET, "/path", [](http::CRequest& req, http::CResponse& res) { });
+  // app.use(cache);
   // tpl.render("path/to/file.tpl", data);
   // srv.on("close", ...);
   
-  router.match(http::GET, "/favicon.ico", [](http::CRequest& req, http::CResponse& res) {
-    log::info << "> " << req.head(http::HOST) << " /favicon.ico" << log::endl;
-    
-    res.type(http::ICON);
-    
-    std::ifstream ifs("favicon.ico", std::ios::binary | std::ios::in);
-    if(ifs) 
-    {
-      std::string output;
-      ifs.seekg(0, std::ios::end);
-      //output.reserve(ifs.tellg());
-      ifs.seekg(0, std::ios::beg);
-      //output.assign(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>());
-    
-      res.status(http::OK);
-      res.send(output);
-    }
-    else
-    {
-      res.status(http::NOTFOUND);
-      log::warn << "> Cannot open file!" << log::endl;
-    }
-    
+  app.match(http::GET, "/products/{id}", [](http::CRequest& req, http::CResponse& res) {
+    log::info << "> " << req.head(http::HOST) << " " << req.path() << " " << req.param("id") << log::endl;
+    res.status(http::OK);
+    res.send("test");
     res.end();
-  });  
-  router.match(http::GET, "/products/:id", [](http::CRequest& req, http::CResponse& res) {
-    log::info << "> " << req.head(http::HOST) << " " << req.path() << log::endl;
-    
   });
-  router.match(http::GET, [](http::CRequest& req, http::CResponse& res) {
-    log::info << "> " << req.head(http::HOST) << " " << req.path()  << log::endl;
-    
+  app.match(http::GET, "*", [](http::CRequest& req, http::CResponse& res) {
     res.type(http::HTML);
-    std::ifstream ifs("index.html", std::ios::binary | std::ios::in);
+    
+    std::ifstream ifs("views/index.html", std::ios::binary | std::ios::in);
     if(ifs) 
     {
       std::stringstream ss;
@@ -77,12 +48,12 @@ int main(int argc, char** argv)
       log::warn << "> Cannot open file!" << log::endl;
     }
     
-    res.end();
-    
     //res.send(fio.read("relative/path/to/file", file::UTF8));
     //res.send(tpl.render("relative/path/to/template.tpl", data));
+    
+    res.end();
   });
-  server.listen([]() {
+  srv.listen([]() {
     log::info << "> Listening." << log::endl;
   });
   

@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1464966020 source:c:\workspace\cpp\project.hermes\src\main.cpp
+1465573838 source:c:\workspace\cpp\project.hermes\src\main.cpp
 	<http/CServer.hpp>
 	<http/CRouter.hpp>
 	<http/CApp.hpp>
@@ -9,10 +9,10 @@
 	<dirent.h>
 	<sys/stat.h>
 
-1464709497 c:\workspace\cpp\project.hermes\inc\http.hpp
+1465476561 c:\workspace\cpp\project.hermes\inc\http.hpp
 	<unordered_map>
 
-1464695003 c:\workspace\cpp\project.hermes\inc\core.hpp
+1465479032 c:\workspace\cpp\project.hermes\inc\core.hpp
 	<string>
 
 1464795980 c:\workspace\cpp\project.hermes\inc\net.hpp
@@ -129,7 +129,7 @@
 	<string>
 	<sstream>
 
-1464683655 c:\workspace\cpp\project.hermes\inc\http\crequest.hpp
+1465572692 c:\workspace\cpp\project.hermes\inc\http\crequest.hpp
 	<net.hpp>
 	<http.hpp>
 	<watch.hpp>
@@ -138,7 +138,7 @@
 	<cstdio>
 	<map>
 
-1464966761 c:\workspace\cpp\project.hermes\inc\http\cserver.hpp
+1465574255 c:\workspace\cpp\project.hermes\inc\http\cserver.hpp
 	<core/CEvent.hpp>
 	<core/CEventEmmiter.hpp>
 	<log/CLogger.hpp>
@@ -158,7 +158,7 @@
 	<string>
 	<memory>
 
-1464771399 c:\workspace\cpp\project.hermes\inc\http\cresponse.hpp
+1465479179 c:\workspace\cpp\project.hermes\inc\http\cresponse.hpp
 	<watch.hpp>
 	<http.hpp>
 	<core/CSynchronizable.hpp>
@@ -171,7 +171,7 @@
 	<core/CEvent.hpp>
 	<memory>
 
-1464687763 c:\workspace\cpp\project.hermes\inc\http\crouter.hpp
+1465573818 c:\workspace\cpp\project.hermes\inc\http\crouter.hpp
 	<http.hpp>
 	<http/CServer.hpp>
 	<http/CRequest.hpp>
@@ -182,19 +182,20 @@
 	<functional>
 	<tuple>
 
-1464709894 c:\workspace\cpp\project.hermes\inc\http\capp.hpp
-	<http.hpp>
+1465228815 c:\workspace\cpp\project.hermes\inc\http\capp.hpp
 	<core/CApp.hpp>
+	<http.hpp>
 	<http/CServer.hpp>
 	<http/AMiddleware.hpp>
 
-1464709837 c:\workspace\cpp\project.hermes\inc\http\amiddleware.hpp
-	<http/CServer.hpp>
+1465228282 c:\workspace\cpp\project.hermes\inc\http\amiddleware.hpp
 
-1464965741 c:\workspace\cpp\project.hermes\inc\http\cfilesystem.hpp
+1465574182 c:\workspace\cpp\project.hermes\inc\http\cfilesystem.hpp
 	<http.hpp>
 	<http/AMiddleware.hpp>
-	<http/CServer.hpp>
+	<http/CApp.hpp>
 	<os.hpp>
 	<log/CLogger.hpp>
+	<string>
+	<vector>
 

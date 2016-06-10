@@ -28,9 +28,9 @@ namespace http
   {
     __STATE__ = 0x00,
     IDLE      = 0x01,
-    FLUSH     = 0x02,
-    STARTED   = 0x03,
-    DONE      = 0x04
+    START     = 0x02,
+    FLUSH     = 0x04,
+    DONE      = 0x08
   };
   
   enum EStatus
@@ -152,6 +152,28 @@ namespace http
       default:
       case EVerb::ALL    : return "UNKNOWN";
     }
+  }
+
+  inline std::string getType(const std::string& ext)
+  {
+    if(ext == "ico")
+      return "image/x-icon";
+    else if(ext == "gif")
+      return "image/gif";
+    else if(ext == "jpg")
+      return "image/jpeg";
+    else if(ext == "png")
+      return "image/png";
+    else if(ext == "js")
+      return "text/css";
+    else if(ext == "css")
+      return "text/css";
+    else if(ext == "html")
+      return "text/html";
+    else if(ext == "text")
+      return "text/plain";
+    else
+      return "text/plain";
   }
 }
 

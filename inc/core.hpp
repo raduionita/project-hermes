@@ -2,6 +2,7 @@
 #define __core__
 
 #include <string>
+// #include <algorithm> // conflicts with logger
 
 namespace core
 {
@@ -15,11 +16,46 @@ namespace core
   
   inline void noop(void) { }
   
-  void inline tolower(std::string& src)
+  inline void tolower(std::string& src)
   {
     for(size_t i = 0; i < src.size(); ++i)
       src[i] = src[i] > 0x40 && src[i] < 0x5B ? src[i] | 0x60 : src[i];
   }
+  
+   // @todo This sucks, fix it
+  inline std::string basename(const std::string& path)
+  {
+    std::string base;
+    base.reserve(path.size());
+    for(size_t i = path.size() - 1, j = 0; i > 0; --i)
+    {
+      char ch = path[i];
+      if(ch == 0x2D || ch == 0x2E || (ch >= 0x30 && ch <= 0x39) || (ch >= 0x41 && ch <= 0x5A) || ch == 0x5F || (ch >= 0x61 && ch <= 0x7A))
+        base[j++] = ch;
+    }
+    base.shrink_to_fit();
+    return base;
+  }
+  
+/*
+  // trim from start
+  static inline std::string &ltrim(std::string &s) 
+  {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+    return s;
+  }
+
+  static inline std::string &rtrim(std::string &s) 
+  {
+    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+    return s;
+  }
+
+  static inline std::string &trim(std::string &s) 
+  {
+    return ltrim(rtrim(s));
+  }
+*/
 }
 
 /*

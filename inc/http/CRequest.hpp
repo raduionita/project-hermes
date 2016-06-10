@@ -19,6 +19,7 @@ namespace http
   
     typedef std::string param_t;
     typedef std::string value_t;
+    typedef std::string body_t;
     
     protected:
     socket_t                  mSocket;
@@ -28,8 +29,8 @@ namespace http
     std::string               mPath;
     hashmap<param_t, value_t> mParams;
     hashmap<param_t, value_t> mQuery;
-    hashmap<int,     value_t> mHead;
-    std::string               mBody;
+    hashmap<int,     value_t> mHead; // replace with CHeader
+    body_t                    mBody;
     
     public:
     CRequest(socket_t& socket, const CMessage& msg)
@@ -74,6 +75,7 @@ namespace http
           
           // @todo Add remaining VERBS/METHODS
           
+          // @todo Move query string into mQuery
           mPath = p;
         }
         else             // headers
@@ -97,6 +99,8 @@ namespace http
             head = EHead::LANGUAGE;
           else if(key == "user-agent")
             head = EHead::USERAGENT;
+          else if(key == "content-type")
+            head = EHead::TYPE;
           
           
           
@@ -150,7 +154,7 @@ namespace http
       return mVerb;
     }
     
-    std::string path() const
+    inline std::string path() const
     {
       return mPath;
     }
@@ -161,6 +165,12 @@ namespace http
       if(it == mParams.end())
         return "undefined";
       return it->second;
+    }
+    
+    CRequest& param(const param_t& k, const value_t& v)
+    {
+      mParams[k] = v;
+      return *this;
     }
   
     value_t head(EHead key) const
@@ -176,11 +186,16 @@ namespace http
       return mQuery;
     }
     
-    std::string body() const
+    body_t body() const
     {
       return mBody;
     }
   
+    value_t type() const
+    {
+      return head(EHead::TYPE);
+    }
+    
     watch::milliseconds time() const
     {
       return mTime;

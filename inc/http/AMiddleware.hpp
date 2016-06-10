@@ -1,14 +1,20 @@
 #ifndef __http_amiddleware_hpp__
 #define __http_amiddleware_hpp__
 
-#include <http/CServer.hpp>
-
 namespace http
 {
+  class CApp;
+
   class AMiddleware
   {
     public:
-    virtual void use(CServer& server) = 0;
+    virtual ~AMiddleware()
+    {
+      
+    }
+    
+    public:
+    virtual void use(http::CApp& app) = 0;
   };
 }
 
