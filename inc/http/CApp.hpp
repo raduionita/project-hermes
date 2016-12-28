@@ -13,50 +13,50 @@ namespace http
     public:
     CServer& mServer;
     CRouter* mRouter;
-    
+
     public:
     CApp(CServer& server) : mServer(server), mRouter(new CRouter(server))
     {
-      log::info << "http::CApp::CApp(server)" << log::endl;
+      log::debug << "http::CApp::CApp(server)" << log::endl;
     }
-    
+
     ~CApp()
     {
       delete mRouter;
       mRouter = nullptr;
     }
-    
+
     public:
     CApp& use(AMiddleware& mid)
     {
       mid.use(*this);
       return *this;
     }
-    
+
     void close()
     {
       mServer.close();
     }
-    
+
     CApp& match(EVerb verb, const std::string& path, std::function<void(CRequest&, CResponse&)>&& callback)
     {
       // add callback to paths
       mRouter->match(verb, path, std::move(callback));
       return *this;
     }
-    
+
     CApp& match(EVerb verb, std::function<void(CRequest&, CResponse&)>&& callback)
     {
       mRouter->match(verb, "", std::move(callback));
       return *this;
     }
-    
+
     CApp& match(const std::string& path, std::function<void(CRequest&, CResponse&)>&& callback)
     {
       mRouter->match(EVerb::ALL, path, std::move(callback));
       return *this;
-    } 
-    
+    }
+
     CApp& match(std::function<void(CRequest&, CResponse&)>&& callback)
     {
       mRouter->match(EVerb::ALL, "", std::move(callback));

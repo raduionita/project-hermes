@@ -6,25 +6,25 @@
 #include <sstream>
 #include <fstream>
 
-#include <dirent.h>
-#include <sys/stat.h>
+//#include <dirent.h>
+//#include <sys/stat.h>
 
 int main(int argc, char** argv)
 {
-  log::info << "::main(argc, argv)" << log::endl;  
-  
+  log::debug << "::main(argc, argv)" << log::endl;
+
   http::CServer      srv;          // http::server()
   http::CApp         app(srv);     // for handling system events
   http::CFileSystem  filesystem("public");
   // http::CCaching     cache("cache");
   // http::CTplRenderer tpl("views");
   // os::CFileIO        fio;
-  
+
   app.use(filesystem);
   // app.use(cache);
   // tpl.render("path/to/file.tpl", data);
   // srv.on("close", ...);
-  
+
   app.match(http::GET, "/products/{id}", [](http::CRequest& req, http::CResponse& res) {
     log::info << "> " << req.head(http::HOST) << " " << req.path() << " " << req.param("id") << log::endl;
     res.status(http::OK);
@@ -32,10 +32,11 @@ int main(int argc, char** argv)
     res.end();
   });
   app.match(http::GET, "*", [](http::CRequest& req, http::CResponse& res) {
+    log::info << "> " << req.head(http::HOST) << " " << req.path() << " > " << "*" << log::endl;
     res.type(http::HTML);
-    
+    // try to open index.html
     std::ifstream ifs("views/index.html", std::ios::binary | std::ios::in);
-    if(ifs) 
+    if(ifs)
     {
       std::stringstream ss;
       ss << ifs.rdbuf();
@@ -47,16 +48,16 @@ int main(int argc, char** argv)
       res.status(http::NOTFOUND);
       log::warn << "> Cannot open file!" << log::endl;
     }
-    
+
     //res.send(fio.read("relative/path/to/file", file::UTF8));
     //res.send(tpl.render("relative/path/to/template.tpl", data));
-    
+
     res.end();
   });
-  srv.listen([]() {
-    log::info << "> Listening." << log::endl;
+  srv.listen(8080, []() {
+    log::info << "> Listening..." << log::endl;
   });
-  
+
   return 0;
 }
 
@@ -64,7 +65,7 @@ int main(int argc, char** argv)
 // restfull
   // RESOURCE
     // /tickets              # get all tickets
-    // /tickets/19           # get a ticket 
+    // /tickets/19           # get a ticket
     // /tickets/10/messages  # get all messages within tickets
   // FILTERING
     // /tickets?order=-priority                                           # order by priority desc
@@ -72,7 +73,7 @@ int main(int argc, char** argv)
     // /tickets?fields=id,subject,status&order=-updated&limit=10          # only specific fields
     // /tickets?filter[subject]=%something                                # where subject like '%something'
 
-    
-// www.exmaple.com/my-cool-product-category 
+
+// www.exmaple.com/my-cool-product-category
 // api.example.com/products/413
 */

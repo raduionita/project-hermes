@@ -17,7 +17,7 @@ namespace net
       SERVER = 0,
       CLIENT = 1
     };
-    
+
     enum ESocket
     {
       INVALID = INVALID_SOCKET,
@@ -31,15 +31,15 @@ namespace net
     CSocket()
     : mSocket(INVALID_SOCKET)
     {
-      log::info << "net::CSocket::CSocket()" << log::endl;
+      log::debug << "net::CSocket::CSocket()" << log::endl;
     }
-    
+
     CSocket(socket_t socket)
     : mSocket(socket)
     {
-      log::info << "net::CSocket::CSocket(socket)" << log::endl;
-      
-      if(socket != INVALID_SOCKET) 
+      log::debug << "net::CSocket::CSocket(socket)" << log::endl;
+
+      if(socket != INVALID_SOCKET)
       {
         sockaddr_in sin;
         socklen_t len = sizeof(sin);
@@ -47,7 +47,7 @@ namespace net
         log::info << "> Binding to socket " << mSocket << " on port " << ::ntohs(sin.sin_port) << "." << log::endl;
       }
     }
-    
+
     /**
      * Socket constructor factory from different parameters
      * @param EType          type        ESocket::CLIENT or ESocket::SERVER build strategy
@@ -60,66 +60,66 @@ namespace net
     CSocket(EType type, port_t port, const host_t& host, EProtocol protocol = EProtocol::TCP, EAddressType addresstype = EAddressType::UNSPEC, int limit = SOMAXCONN)
     : mSocket(INVALID_SOCKET)
     {
-      log::info << "net::CSocket::CSocket(type, port, host, protocol, addresstype, limit)" << log::endl;
+      log::debug << "net::CSocket::CSocket(type, port, host, protocol, addresstype, limit)" << log::endl;
       mSocket = build(type, port, host, protocol, addresstype, limit);
     }
-    
+
     CSocket(const CSocket& that)
     {
-      log::info << "net::CSocket::CSocket(that&)" << log::endl;
-      
+      log::debug << "net::CSocket::CSocket(that&)" << log::endl;
+
       mSocket = that.mSocket;
     }
-    
+
     CSocket(CSocket&& that)
     {
-      log::info << "net::CSocket::CSocket(that&&)" << log::endl;
-      
+      log::debug << "net::CSocket::CSocket(that&&)" << log::endl;
+
       mSocket = std::move(that.mSocket);
     }
-    
+
     virtual ~CSocket()
     {
-      log::info << "net::CSocket::~CSocket()" << log::endl;
+      log::debug << "net::CSocket::~CSocket()" << log::endl;
       //close();
     }
-    
+
     CSocket& operator =(const CSocket& that)
     {
-      log::info << "net::CSocket::operator=(that&)" << log::endl;
-      
+      log::debug << "net::CSocket::operator=(that&)" << log::endl;
+
       if(this != &that)
       {
         mSocket = that.mSocket;
       }
       return *this;
     }
-    
+
     CSocket& operator =(CSocket&& that)
     {
-      log::info << "net::CSocket::operator=(that&&)" << log::endl;
-      
+      log::debug << "net::CSocket::operator=(that&&)" << log::endl;
+
       if(this != &that)
       {
         mSocket = std::move(that.mSocket);
       }
       return *this;
     }
-    
+
     operator socket_t() const
     {
       return mSocket;
     }
-    
+
     bool operator ==(socket_t socket) const
     {
       return mSocket == socket;
     }
-    
+
     public:
     void close()
     {
-      log::info << "net::CSocket::close()" << log::endl;
+      log::debug << "net::CSocket::close()" << log::endl;
       // OR ::close()
       ::closesocket(mSocket);
       if(mSocket == CSocket::INVALID)
@@ -132,11 +132,11 @@ namespace net
     {
       return mSocket != INVALID_SOCKET;
     }
-    
+
     static socket_t build(EType type, port_t port, const host_t& host, EProtocol protocol = EProtocol::TCP, EAddressType addresstype = EAddressType::UNSPEC, int limit = SOMAXCONN)
     {
-      log::info << "net::CSocket::build(type, port, host, protocol, addresstype, limit)" << log::endl;
-      
+      log::debug << "net::CSocket::build(type, port, host, protocol, addresstype, limit)" << log::endl;
+
       socket_t   sock = INVALID_SOCKET;
       ulong      temp = 1;
       int        yes  = 1;
@@ -150,7 +150,7 @@ namespace net
       hints.ai_socktype = static_cast<int>(protocol == EProtocol::TCP ? ESocketType::TCP : ESocketType::UDP);
       hints.ai_flags    = type == EType::SERVER ? AI_PASSIVE : 0;                 // server
       hints.ai_protocol = static_cast<int>(protocol); // type == EType::CLIENT ? static_cast<int>(protocol) : 0; // client
-      
+
       // use hints to get an address
       // NULL => 0.0.0.0 => bind to every ip on this machine
       status = ::getaddrinfo(host.size() == 0 ? NULL : host.c_str(), std::to_string((uint)port).c_str(), &hints, &srvinfo);
@@ -162,17 +162,17 @@ namespace net
       // find and bind/connect to an address
       for(ptr = srvinfo; ptr != NULL; ptr = ptr->ai_next)
       {
-        //          socket(EAddressType,   ESocketType,      EProtocol); 
+        //          socket(EAddressType,   ESocketType,      EProtocol);
         sock = ::socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
         if(sock == INVALID_SOCKET)
         {
           log::error << "> Error socket " << sock << ":" << gai_strerror(WSAGetLastError()) << "." << log::endl;
           continue;
         }
-        
+
         ::setsockopt(sock, SOL_SOCKET,   SO_REUSEADDR, (char*)(&yes), sizeof(int));  // prevent "address in use" error
         ::setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY,  (char*)(&no),  sizeof(int));  // disable ipv6 only
-        
+
         // non-blocking
 #ifdef _WIN32_WINNT
         temp = 1;
@@ -255,7 +255,7 @@ namespace net
             ::getsockname(sock, (sockaddr_t*)(&sin), &len);
             log::info << "> Listening to socket " << sock << " on port " << ::ntohs(sin.sin_port) << "." << log::endl;
           }
-          else 
+          else
           {
             sockaddr_in6_t sin6;
             socklen_t len = sizeof(sin6);
@@ -265,10 +265,10 @@ namespace net
           }
         }
       }
-      
+
       return sock;
     }
-    
+
     // getHost()
     // getPort()
     // getSockaddr()

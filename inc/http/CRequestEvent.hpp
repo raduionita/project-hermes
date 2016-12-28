@@ -12,14 +12,14 @@ namespace http
   class CRequestEvent : public CEvent
   {
     typedef std::shared_ptr<CRequest>  request_t;
-  
+
     public:
     request_t mRequest;
-    
+
     public:
     CRequestEvent(request_t request) : CEvent("request"), mRequest(request)
     {
-      log::info << "http::CRequestEvent::CRequestEvent(request)" << log::endl;
+      log::debug << "http::CRequestEvent::CRequestEvent(request)" << log::endl;
     }
   };
 }

@@ -13,7 +13,7 @@ namespace net
     public:
     AServer()
     {
-      log::info << "net::AServer::AServer()" << log::endl;
+      log::debug << "net::AServer::AServer()" << log::endl;
 #ifdef _WIN32_WINNT
       log::info << "> Init Windows Sockets." << log::endl;
       static WSADATA  wsadata;
@@ -26,10 +26,10 @@ namespace net
       // do nothig
 #endif // _WIN32_WINNT
     }
-    
+
     virtual ~AServer()
     {
-      log::info << "net::AServer::~AServer()" << log::endl;
+      log::debug << "net::AServer::~AServer()" << log::endl;
 #ifdef _WIN32_WINNT
       WSACleanup();
       log::info << "> Clean Windows Sockets." << log::endl;
@@ -38,27 +38,27 @@ namespace net
 #endif
     }
   };
-  
+
   class CServer : public AServer // TCP & UDP
   {
     public:
     CServer(EProtocol protocol)
     {
-      
+
     }
-    
+
     public:
     //CSocket& bind()
-    
+
     CServer& listen()
     {
       return *this;
     }
   };
-  
+
   class Client
   {
-  
+
   };
 }
 

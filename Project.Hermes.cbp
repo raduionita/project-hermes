@@ -33,8 +33,9 @@
 			<Add directory="inc" />
 		</Compiler>
 		<Linker>
+			<Add option="-lws2_32" />
 			<Add option="-static" />
-			<Add library="lib/libws2_32.a" />
+			<Add directory="../../../MinGW64/mingw64/x86_64-w64-mingw32/lib" />
 		</Linker>
 		<Unit filename="inc/core.hpp" />
 		<Unit filename="inc/core/CApp.hpp" />

@@ -1,5 +1,9 @@
-# Project.Hermes
+## Project.Hermes
 C++ Client/Server Framework
 
-# Test
-$ telnet server.ip.address 8080
+## TEST
+$ telnet server.ip.address 8080 # after starting hermes.exe
+
+## TODO
+* Memory manager/allocator
+* Dump to temp file-queur it too many requests

@@ -11,79 +11,81 @@
 
 namespace http
 {
+  using namespace core;
+
   class CResponse : public core::CSynchronizable
   {
     friend class CServer;
-  
+
     protected:
     socket_t                    mSocket;
     watch::milliseconds         mTime;
     EState                      mState;
-    
+
     uint                        mStatus;
     hashmap<int, std::string>   mHead;    // should be EHead, string
     std::string                 mBody;    // this should be a CBuffer<char>
-    
+
     public:
-    CResponse(socket_t sock) 
+    CResponse(socket_t sock)
     : mSocket(sock), mTime(watch::millitime())
     {
-      log::info << "http::CResponse::CResponse(sock)" << log::endl;
+      log::debug << "http::CResponse::CResponse(sock)" << log::endl;
       mStatus            = http::NOTFOUND;
       mState             = EState::IDLE;
       mHead[EHead::TYPE] = "text/plain";
     }
-    
+
     CResponse(CResponse&& that)
     : mSocket(that.mSocket)
     {
-      log::info << "http::CResponse::CResponse(that&&)" << log::endl;
+      log::debug << "http::CResponse::CResponse(that&&)" << log::endl;
       mTime   = std::move(that.mTime);
       mHead   = std::move(that.mHead);
       mBody   = std::move(that.mBody);
       mStatus = std::move(that.mStatus);
       mState  = std::move(that.mState);
     }
-    
+
     ~CResponse()
     {
-      log::info << "http::CResponse::~CResponse()" << log::endl;
+      log::debug << "http::CResponse::~CResponse()" << log::endl;
     }
-    
+
     public:
     socket_t socket() const
     {
       return mSocket;
     }
-    
+
     bool is(EState state) const
     {
       return mState == state;
     }
-    
+
     CResponse& set(EState state)
     {
       mState = state;
       return *this;
     }
-    
+
     CResponse& status(EStatus val)
     {
       mStatus = val;
       head(EHead::STATUS, std::to_string(static_cast<int>(val)));
       return *this;
     }
-    
+
     CResponse& head(EHead key, const std::string& value)
     {
-      if(mState != EState::IDLE) 
+      if(mState != EState::IDLE)
         log::warn << "> Setting headers after you started flusing is useless!" << log::endl;
       else
         mHead[key] = value;
       // @todo Some processing may be needed
       return *this;
     }
-    
+
     std::string head(EHead key) const
     {
       auto it = mHead.find(key);
@@ -91,24 +93,24 @@ namespace http
         return "undefined";
       return it->second;
     }
-    
+
     CResponse& type(EType val)
     {
       head(EHead::TYPE, http::getType(val));
       return *this;
     }
-    
+
     std::string type() const
     {
       return head(EHead::TYPE);
     }
-    
+
     CResponse& charset(const std::string value)
     {
       // @todo Needs implementation
       return *this;
     }
-    
+
     CResponse& send(const std::string& data)
     {
       if(mState & EState::FLUSH)
@@ -122,44 +124,44 @@ namespace http
       }
       return *this;
     }
-    
+
     // @todo Add File send feature
     //CResponse& send(const core::CFile& file)
     //{
     //  // @todo send ... file
     //}
-    
+
     // @todo Add Stream send feature
     //CResponse& send(const core::CStream& stream)
     //{
     //  mState = IDLE;
     //  while(!stream.is(done))
-    //    mBody.append(stream.read()) // pop from the front of the stream(fifo) 
+    //    mBody.append(stream.read()) // pop from the front of the stream(fifo)
     //    mState = FLUSH;
     //}
-    
+
     CResponse& end(const std::string& data)
     {
       send(data);
       return end();
     }
-    
+
     CResponse& end()
     {
       mState = EState::FLUSH;
       return *this;
     }
-    
+
     protected:
     watch::milliseconds time() const
     {
       return mTime;
     }
-    
+
     std::string read()
     {
       std::string output("HTTP/1.1 ");
-      
+
       switch(mStatus)
       {
         default:
@@ -214,15 +216,15 @@ namespace http
         }
         output.append(value).append("\r\n");
       }
-      
+
       output.append("Content-Length: ").append(std::to_string(mBody.size())).append("\r\n\r\n");
-      
+
       output.append(mBody);
-      
+
       return output;
     }
-    
-    size_t size() const
+
+    uint size() const
     {
       return mBody.size();
     }

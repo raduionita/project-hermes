@@ -8,32 +8,32 @@
 
 namespace core
 {
-  class CEvent 
+  class CEvent
   {
     public:
     label_t mLabel;
-    
+
     protected:
     CEvent(label_t label) : mLabel(label)
     {
-      log::info << "core::CEvent::CEvent(" << label << ")" << log::endl;
+      log::debug << "core::CEvent::CEvent(" << label << ")" << log::endl;
     }
-    
+
     public:
     CEvent(const CEvent& that)
     {
       mLabel = that.mLabel;
     }
-    
+
     CEvent(CEvent&& that)
     {
       mLabel = std::move(that.mLabel);
     }
-    
+
     public:
     virtual ~CEvent()
     {
-      log::info << "core::CEvent::~CEvent()" << log::endl;
+      log::debug << "core::CEvent::~CEvent()" << log::endl;
     }
   };
 }

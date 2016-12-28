@@ -8,14 +8,23 @@ namespace http
   template <typename K, typename V>
   using hashmap = std::unordered_map<K, V>;
 
+  enum EHttp
+  {
+    __HTTP__ = 0,
+    HTTP09   = 1,
+    HTTP10   = 2,
+    HTTP11   = 4,
+    HTTP20   = 8
+  };
+
   enum EVerb
   {
     __VERB__ = 0x0000,
-    GET      = 0x0001, 
-    POST     = 0x0002, 
-    PUT      = 0x0004, 
+    GET      = 0x0001,
+    POST     = 0x0002,
+    PUT      = 0x0004,
     #undef DELETE
-    DELETE   = 0x0008, 
+    DELETE   = 0x0008,
     OPTIONS  = 0x0010,
     HEAD     = 0x0020,
     TRACE    = 0x0040,
@@ -23,7 +32,7 @@ namespace http
     PATCH    = 0x0100,
     ALL      = GET | POST | PUT | DELETE | OPTIONS | HEAD | TRACE | CONNECT | PATCH
   };
-  
+
   enum EState
   {
     __STATE__ = 0x00,
@@ -32,7 +41,7 @@ namespace http
     FLUSH     = 0x04,
     DONE      = 0x08
   };
-  
+
   enum EStatus
   {
     __STATUS__  = 0,
@@ -47,7 +56,7 @@ namespace http
     UNAVAILABLE = 503,
     LOOP        = 508
   };
-  
+
   enum EType
   {
     __TYPE__ = 0x00,
@@ -64,16 +73,16 @@ namespace http
     JS       = 0x15,  // application/javascript
     CSS      = 0x16,  // text/css
     XML      = 0x17,  // application/xml, text/xml
-    
+
     MP3      = 0x18,  // audio/mpeg3, audio/x-mpeg-3
     MP4      = 0x19,  // video/mp4, video/mpeg
     OGG      = 0x20,  // audio/ogg
     OGV      = 0x21,  // video/ogg
   };
-  
+
   enum EHead // @todo Needs change to enum class
   {
-    __HEAD__       = 0x00, 
+    __HEAD__       = 0x00,
     ACCEPT         = 0x01, // Accept: text/plain
     CHARSET        = 0x02, // Accept-Charset: utf-8
     ENCODING       = 0x03, // Accept-Encoding: gzip OR deflate
@@ -95,14 +104,14 @@ namespace http
     REFERER        = 0x19, // Referer: http://en.wikipedia.org/wiki/Main_Page
     USERAGENT      = 0x20, // User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/21.0
     UPGRADE        = 0x21, // Upgrade: HTTP/2.0, SHTTP/1.3, IRC/6.9, RTA/x11
-    
+
     ETAG           = 0x22, // ETag: 737060cd8c284d8af7ad3082f209582d
     AGE            = 0x23, // Age: 12
     EXPIRES        = 0x24, // Expires: Thu, 01 Dec 1994 16:00:00 GMT
     MODIFIED       = 0x25, // Last-Modified: Tue, 15 Nov 1994 12:45:26 GMT
     SERVER         = 0x26, // Server: Apache/2.4.1 (Unix)
     STATUS         = 0x27, // Status: 200 OK
-    
+
     CSRF           = 0x60  // X-Csrf-Token: i8XNjC4b8KVok4uw5RftR38Wgp2BFwql
   };
 
@@ -111,7 +120,7 @@ namespace http
   inline constexpr bool operator == (int i, EStatus a) { return i == static_cast<int>(a); }
   inline constexpr bool operator == (int i, EType a) { return i == static_cast<int>(a); }
   inline constexpr bool operator == (int i, EHead a) { return i == static_cast<int>(a); }
-  
+
   inline std::string getType(EType type)
   {
     switch(type)
@@ -135,7 +144,7 @@ namespace http
       case EType::OGV:   return std::string("video/ogg");
     }
   }
-  
+
   inline std::string getVerb(EVerb verb)
   {
     switch(verb)

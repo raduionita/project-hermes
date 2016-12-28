@@ -13,29 +13,29 @@ namespace core
   {
     protected:
     std::mutex mMutex;
-    
+
     CSynchronizable()
     {
-      log::info << "core::CSynchronizable::CSynchronizable()" << log::endl;
+      log::debug << "core::CSynchronizable::CSynchronizable()" << log::endl;
     }
-    
+
     virtual ~CSynchronizable()
     {
-      log::info << "core::CSynchronizable::~CSynchronizable()" << log::endl;
+      log::debug << "core::CSynchronizable::~CSynchronizable()" << log::endl;
     }
-    
+
     public:
     bool lock()
     {
       mMutex.lock();
-      log::info << "core::CSynchronizable::lock() [" << std::this_thread::get_id() << "]" << log::endl;
+      log::info << "> Locking [" << std::this_thread::get_id() << "]" << log::endl;
       return true;
     }
-    
+
     bool unlock()
     {
       mMutex.unlock();
-      log::info << "core::CSynchronizable::unlock() [" << std::this_thread::get_id() << "]" << log::endl;
+      log::info << "> Unlocking [" << std::this_thread::get_id() << "]" << log::endl;
       return true;
     }
   };
